@@ -1,0 +1,11 @@
+baseurl = "http://panosgeorgiadis.com/"
+title = "/var/log/messages"
+theme = "code-editor"
+copyright = "Everything is mine."
+paginate = 3
+#canonifyurls = true
+
+[params]
+    author = "Panos Georgiadis"
+    locale = "en-US"
+
