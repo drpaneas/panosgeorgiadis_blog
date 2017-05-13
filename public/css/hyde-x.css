@@ -130,6 +130,39 @@ a.label:focus {
   cursor: pointer;
 }
 
+
+/* SUSE */
+.theme-suse .label {
+  background-color: #0d2c40;
+}
+
+.theme-suse .pagination > li > a,
+.theme-suse .pagination > li > span {
+  color: #0d2c40;
+}
+
+.theme-suse .pagination > .active > a,
+.theme-suse .pagination > .active > span,
+.theme-suse .pagination > .active > a:hover,
+.theme-suse .pagination > .active > span:hover,
+.theme-suse .pagination > .active > a:focus,
+.theme-suse .pagination > .active > span:focus {
+  background-color: #0d2c40;
+  border-color: #0d2c40;
+}
+
+.theme-suse .pagination > .disabled > span,
+.theme-suse .pagination > .disabled > span:hover,
+.theme-suse .pagination > .disabled > span:focus,
+.theme-suse .pagination > .disabled > a,
+.theme-suse .pagination > .disabled > a:hover,
+.theme-suse .pagination > .disabled > a:focus {
+  color: #777;
+  background-color: #fff;
+  border-color: #ddd;
+}
+
+
 /* Red */
 .theme-base-08 .label {
   background-color: #ac4142;

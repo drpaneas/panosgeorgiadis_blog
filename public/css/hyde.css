@@ -177,6 +177,15 @@ a.sidebar-nav-item:focus {
 
 /* Base16 (http://chriskempson.github.io/base16/#default) */
 
+/* SUSE */
+.theme-suse .sidebar {
+  background-color: #0d2c40;
+}
+.theme-suse .content a,
+.theme-suse .related-posts li a:hover {
+  color: #0d2c40;
+}
+
 /* Red */
 .theme-base-08 .sidebar {
   background-color: #ac4142;
