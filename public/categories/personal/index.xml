@@ -13,10 +13,10 @@
     
     <item>
       <title>new_site</title>
-      <link>http://panosgeorgiadis.com/personal/new_site/</link>
+      <link>http://panosgeorgiadis.com/category/personal/new_site/</link>
       <pubDate>Mon, 08 May 2017 22:08:35 +0200</pubDate>
       
-      <guid>http://panosgeorgiadis.com/personal/new_site/</guid>
+      <guid>http://panosgeorgiadis.com/category/personal/new_site/</guid>
       <description>Hugo is a static site engine written in Go.
 It makes use of a variety of open source projects including:
  Cobra Viper J Walter Weatherman Cast  Learn more and contribute on GitHub.

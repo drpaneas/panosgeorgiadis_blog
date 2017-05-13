@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>Panos Blog</title>
-    <link>http://panosgeorgiadis.com/</link>
-    <description>Recent content on Panos Blog</description>
+    <title>Categories on Panos Blog</title>
+    <link>http://panosgeorgiadis.com/category/</link>
+    <description>Recent content in Categories on Panos Blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <lastBuildDate>Mon, 08 May 2017 22:08:35 +0200</lastBuildDate>
     
-	<atom:link href="http://panosgeorgiadis.com/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="http://panosgeorgiadis.com/category/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
