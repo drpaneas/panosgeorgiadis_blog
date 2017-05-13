@@ -2,18 +2,12 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
-    <loc>http://panosgeorgiadis.com/category/personal/new_site/</loc>
+    <loc>http://panosgeorgiadis.com/new_site/</loc>
     <lastmod>2017-05-08T22:08:35+02:00</lastmod>
   </url>
   
   <url>
     <loc>http://panosgeorgiadis.com/categories/</loc>
-    <priority>0</priority>
-  </url>
-  
-  <url>
-    <loc>http://panosgeorgiadis.com/category/</loc>
-    <lastmod>2017-05-08T22:08:35+02:00</lastmod>
     <priority>0</priority>
   </url>
   
