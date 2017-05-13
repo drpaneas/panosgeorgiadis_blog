@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>Categories on /var/log/messages</title>
+    <title>Categories on Panos Blog</title>
     <link>http://panosgeorgiadis.com/categories/</link>
-    <description>Recent content in Categories on /var/log/messages</description>
+    <description>Recent content in Categories on Panos Blog</description>
     <generator>Hugo -- gohugo.io</generator>
-    <copyright>Everything is mine.</copyright>
+    <language>en-us</language>
     
 	<atom:link href="http://panosgeorgiadis.com/categories/index.xml" rel="self" type="application/rss+xml" />
     
