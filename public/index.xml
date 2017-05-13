@@ -13,19 +13,6 @@
     
     <item>
       <title>new_site</title>
-      <link>http://panosgeorgiadis.com/new_site/</link>
-      <pubDate>Mon, 08 May 2017 22:08:35 +0200</pubDate>
-      
-      <guid>http://panosgeorgiadis.com/new_site/</guid>
-      <description>Hugo is a static site engine written in Go.
-It makes use of a variety of open source projects including:
- Cobra Viper J Walter Weatherman Cast  Learn more and contribute on GitHub.
-Setup Some fun facts about Hugo:
- Built in Go Loosely inspired by Jekyll Primarily developed by spf13 on the train while commuting to and from Manhattan. Coded in Vim using spf13-vim  Have questions or suggestions?</description>
-    </item>
-    
-    <item>
-      <title>new_site</title>
       <link>http://panosgeorgiadis.com/blog/2017/05/08/new_site/</link>
       <pubDate>Mon, 08 May 2017 22:08:35 +0200</pubDate>
       
@@ -35,26 +22,6 @@ It makes use of a variety of open source projects including:
  Cobra Viper J Walter Weatherman Cast  Learn more and contribute on GitHub.
 Setup Some fun facts about Hugo:
  Built in Go Loosely inspired by Jekyll Primarily developed by spf13 on the train while commuting to and from Manhattan. Coded in Vim using spf13-vim  Have questions or suggestions?</description>
-    </item>
-    
-    <item>
-      <title>Android: Always embed tabs in ActionBar</title>
-      <link>http://panosgeorgiadis.com/2013-10-17-android-always-embed-tabs-in-actionbar/</link>
-      <pubDate>Thu, 17 Oct 2013 00:00:00 +0000</pubDate>
-      
-      <guid>http://panosgeorgiadis.com/2013-10-17-android-always-embed-tabs-in-actionbar/</guid>
-      <description>When I chose to use a tab layout alongside the standard Android ActionBar for the home screen of my CrunchBase app I found it surprisingly difficult to get the behaviour I wanted: I expected tabs to be embedded in the ActionBar, subject to available space. Not so!
-By default, Android will happily embed tabs into the ActionBar in landscape orientation, if it finds enough room. But in portrait mode they are displayed in their own bar and the large blank space left just above them is ignored.</description>
-    </item>
-    
-    <item>
-      <title>Android: Always embed tabs in ActionBar</title>
-      <link>http://panosgeorgiadis.com/blog/2013/10/17/android-always-embed-tabs-in-actionbar/</link>
-      <pubDate>Thu, 17 Oct 2013 00:00:00 +0000</pubDate>
-      
-      <guid>http://panosgeorgiadis.com/blog/2013/10/17/android-always-embed-tabs-in-actionbar/</guid>
-      <description>When I chose to use a tab layout alongside the standard Android ActionBar for the home screen of my CrunchBase app I found it surprisingly difficult to get the behaviour I wanted: I expected tabs to be embedded in the ActionBar, subject to available space. Not so!
-By default, Android will happily embed tabs into the ActionBar in landscape orientation, if it finds enough room. But in portrait mode they are displayed in their own bar and the large blank space left just above them is ignored.</description>
     </item>
     
   </channel>
