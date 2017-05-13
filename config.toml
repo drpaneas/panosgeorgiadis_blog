@@ -57,7 +57,7 @@ paginate = 10
 
     # Metadata used to drive integrations.
     googleAnalytics = "Your Google Analytics tracking code"
-    gravatarHash = "drpaneas@gmail.com"
+    gravatarHash = "a98d3abef556df10b9dfd4710e368f0e"
 
     # Sidebar social links, these must be full URLs.
     github = "https://github.com/drpaneas"
