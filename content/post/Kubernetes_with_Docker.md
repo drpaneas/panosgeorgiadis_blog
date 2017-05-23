@@ -149,3 +149,83 @@ In a very-very high-level view, we have these kubernetes building-blocks we
 talked about. This is really how the whole environment looks like:
 
 ![Kubernetes Architecture](/images/kubernetes_architecture.png)
+
+We have *one* **master/controller**  and we have *1-to-N* **nodes** which can
+have *1-to-N* **pods** and each pod can have *1-to-N* **containers**. How many
+of those *N* things you need, it is based upon the desired state of the
+configuration which is located in the *master/controller* via *YAML* form.
+Also, this depends on the minion resources (either physical or virtual) that
+you can allocate.
+
+Each node has to have at least some container management engine installed, such
+as Docker.
+
+#### Nodes (Minions)
+
+You can think of these as *container clients* and they can be either physical
+or virtual. Also, your container management engine has to be installed on, (such
+as Docker) and hosts the various containers within your managed cluster.
+
+Furthermore, each minion will run **ETCD**, as well as the *master/controller*.
+ETCD is a key-pair management and communication service, used by Kubernetes
+for exchanging messages and reporting on cluster status. It's a way for us to
+keep everything in-sync and exchange information from the individual minions to
+our master controller and as well as our Kubernetes Proxy -- that's the other
+item that runs on each of the minions. So, for each minion there are two things
+that are running and are specific to Kubernetes, which is ETCD and Kubernetes
+Proxy, and last but not least, Docker has to be installed as well. During this
+tutorial we will go over all these packages and install them.
+
+#### Pods
+
+The simplest definition is that a pod consists of one or more containers. Going
+further, these containers are then guaranteed (by the master controller) to be
+located on the same host machine in order to facilitate shared resources
+(volumes, services mapped through ports). Pods are assigned with unique IPs
+within each cluster, so these allow our application to use ports for the Pod
+without having to worry about conflicting port utilization. In another words, I
+can have multiple Pods running at port `80` or `443` or `whatever`, on the same
+host, because I am not re-mapping those ports but I am giving each Pod a unique
+IP address within the cluster, so I don't have to worry about port conflicts.
+
+Pods can contain definitions of disk volumes or share, and then provide
+access from those to all the containers within the pod.
+
+An the finally, pod management is done through the API or delegated to a
+controller.
+
+#### Labels
+
+Clients can attach "key-value pairs" to any object in the system (like Pods or
+Nodes). These become the labels that identify them in the configuration and
+management of them. And this is where *Selectors* come in, because they are
+used in conjuction.
+
+#### Selectors
+
+Label Selectors represent queries that are made against those labels. They
+resolve to the corresponding matching objects and will show when we are
+managing our Pods in our cluster how we use the built-in API and tools for
+Kubernetes in order to get a selection of objects based on these label
+selectors.
+
+These two items (Labels and Selectors) are the primary way that grouping is
+done in Kubernetes and determine which components that a given operation
+applies to when indicated.
+
+#### Controllers
+
+These are used in the management of your cluster. Controllers are the mechanism
+by which your desired configuration state is enforced. In fact the controllers
+main purpose is to enforce the desired state of your configuration to your
+cluster. They manage a set of pods and, depending on the desired configuration
+state, may engage other controllers to handle replication and scaling (through the
+**Replication Controller**) of XX number of containers and pods across the cluster.
+It is also responsible for replacing any container in a pod that fails or any
+container in the cluster that fails (based on the desired state of the cluster).
+And again, all these are representing a desired state written in YAML files.
+
+Other controllers that can be engaged include **DaemonSet Controller** which
+enforces a 1:1 ration of pods to minions and a **Job Controller** that runs
+pods to "completion", such as in batch jobs. Each set of pods any controller
+manages, is determined by the label selectors that are part of its definition.
