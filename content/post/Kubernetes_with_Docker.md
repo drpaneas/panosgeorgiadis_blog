@@ -98,3 +98,54 @@ reporting and logging options.
 Last, we will dig into some use cases, such as setup an Apache WebSite Cluster and and
 Guestbook (Multiple Services) implemention from the K8s website.
 
+## What is Kubernetes
+
+By definition, Kubernetes is an open source container cluster manager, and it's
+usually referred to by its internal name withing Google development - **k8s**.
+Google donated it to the open source world as a *"seed technology"* at 2015, to
+the newly formed *CNCF - Cloud Native Computing Foundation*, which established
+partnership with *The Linux Foundation*. The primary goal of Kubernetes is to
+provide a platform for automating deployment, scaling and operations of
+application containers across a cluster of hosts. In fact, withing Google they
+have been using Kubernetes-like tools in order to run daily billions of
+containers within their services.
+
+### Design Overview
+
+Kubernetes is built through a set of components (building blocks or
+*primitives*), which when they are used collectively, then they provide a
+method for the deployment, maintenance and scalability or container based
+application clusters. These *primitives* are designed to operate without
+requiring any kind of special knowledge from the user. They are really easy to
+work with and they are also highly extensible through an API. All the
+components of Kubernetes (internal, extensions and containers) are making use
+of the API.
+
+Although Kubernetes was originally designed withing Google's infrastructure,
+nowadays it's considered the default option for other majer public cloud
+providers, such as AWS and Azure.
+
+### Components
+
+So, what are the components (building blocks) that are going into to
+Kubernetes:
+
+* Nodes (often referred to as minions)
+* Pods
+* Labels
+* Selectors
+* Controllers (multiple kinds of them)
+* Services
+* Control Pane (the master controller)
+* API
+
+Some of these topics are relatively involved, so you need to practice by
+yourself and manage your own Kubernetes environment, in order to be able to
+understand at 'experience' level, how these things work.
+
+### Architecture
+
+In a very-very high-level view, we have these kubernetes building-blocks we
+talked about. This is really how the whole environment looks like:
+
+![Kubernetes Architecture](/images/kubernetes_architecture.png)
