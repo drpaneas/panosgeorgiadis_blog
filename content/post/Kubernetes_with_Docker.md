@@ -229,3 +229,316 @@ Other controllers that can be engaged include **DaemonSet Controller** which
 enforces a 1:1 ration of pods to minions and a **Job Controller** that runs
 pods to "completion", such as in batch jobs. Each set of pods any controller
 manages, is determined by the label selectors that are part of its definition.
+
+## Setup and Configuration
+
+### Packages and Dependencies
+
+One of the first things we need to do is to install NTP. NTP has to be 
+enabled and running in **all** of the servers we are going to have in
+our cluster. In this example, I have four terminals open:
+
+```
+- centos-master		[172.31.28.38] 		[54.154.199.96]
+- centos-minion1	[172.31.120.121]	[54.171.6.143]
+- centos-minion2	[54.246.160.157]	[172.31.110.96]
+- centos-minion3	[54.246.220.156]	[172.31.23.169]
+```
+
+So we are going to use 3 minions as worker nodes, and then 1 server as the
+master in our cluster. So, lets us install ntp:
+
+```bash
+yum install -y ntp
+```
+
+We want to be sure that all the servers in our cluster are time-synchronised
+down to the second. This is because we are going to use a service that logs
+what happen to our cluster upon special conditions and it is important that
+our servers are reporting as close and as accurate as possible.
+
+```bash
+systemctl enable ntpd
+systemctl start ntpd
+```
+
+Feel free to check the status in order to verify that is running:
+
+```bash
+systemctl status ntpd
+```
+
+As soon as we finish with the installation of `ntp` in all of our servers in
+the cluster, then we need to make sure that we have full name resolution for
+the servers in our environment. If you are installing this locally and you
+do not port-forward this ports externally, then it is best to use your internal
+IP addresses rather than the external ones. Similarly, this means that you cannot
+use the name of the server, because this will refer to the external IP address.
+But, to make things look as they supposed to be, I am going to create a file
+`/etc/hosts` with the corrersponding nickname of these servers. This file has to
+be into each server that is part of my cluster and it has to resolve the nicknames
+against the internal/private IP address. In that case, I will be able to use those
+internal hostnames in my configuration file:
+
+```bash
+vim /etc/hosts
+
+172.31.28.38    centos-master
+172.31.120.121  centos-minion1
+172.31.110.96   centos-minion2
+172.31.23.169   centos-minion3
+```
+
+Put this into every server and then make sure that all of them can ping each other
+based on those nicknames:
+
+```bash
+ping centos-master
+ping centos-minion1
+ping centos-minion2
+ping centos-minion3
+```
+
+As soon as you finished this and your verified that all server can ping each other
+based on their internal IP address, it is about time to add a repository that we
+can use to install the latest version of `Docker` and `Kubernetes`.
+
+```bash
+vim /etc/yum.repos.d/virt7-docker-common-release.repo
+[virt7-docker-common-release]
+name=virt7-docker-common-release
+baseurl=http://cbs.centos.org/repos/virt7-docker-common-release/x86_64/os/
+gpgcheck=0
+```
+
+Save it and then update the cache of the system:
+
+```bash
+yum update
+```
+
+Make sure you do this for all the server in the cluster.
+
+Next, make sure that all firewalls are disabled, since this is a demo and not
+a production environment, so we need to avoid problems of port filtering.
+
+```bash
+systemctl status iptables  --> disabled
+systemctl status firewalld --> disabled
+```
+
+Ok, now it is about time to install `etcd`. This is the mechanism that helps
+all the members of the cluster to communicate and advertise their status,
+availability, and their logs. So, we need to install `etcd` and `kubernetes`.
+These two, will also pull `cadvisor` which for containers and containerized
+apps. Then we will, start configuring the master and the minion, but right
+now I will finish by installing the software:
+
+```
+yum install -y --enablerepo=virt7-docker-common-release kubernetes docker
+```
+
+### Configure the Master
+
+Since we are into the master, we first need to configure the Kubernetes
+itself:
+
+```bash
+vim /etc/kubernetes/config
+
+# If you want to log errors in the systemd-journal for Kubernetes
+KUBE_LOGTOSTDERR="--logtostderr=true"
+
+# If you want to have debug level log files in your systemd journal
+# 0 is the most verbose (debug level)
+KUBE_LOG_LEVEL="--v=0"
+
+# Disable privileged docker containers within the cluster
+KUBE_ALLOW_PRIV="--allow-privileged=false"
+
+# Define the API Server
+# How the controller-manager, scheduler, and proxy find the apiserver
+KUBE_MASTER="--master=http://centos-master:8080"
+
+# Define the ETCD Server
+KUBE_ETCD_SERVER="--etcd-servers=http://centos-master:2379"
+```
+
+This is the initial configuration for our master kubernetes node. Notice
+that I used domain names, and not IP address, in that way if the IP address
+of the Kubernetes ETCD server changes, the cluster will still be able to
+resolve it, using the DNS server.
+
+#### Configure ETCD
+
+Install it:
+
+```bash
+yum install -y etcd
+```
+
+Configure it:
+
+```bash
+vim /etc/etcd/etcd.conf
+
+# It is OK to leave these two with their default values
+ETCD_NAME=default
+ETCD_DATA_DIR="/var/lib/etcd/default.etcd"
+
+# Listen on all interfaces and accept connections from anywhere
+ETCD_LISTEN_CLIENT_URLS="http://0.0.0.0:2379"
+
+# Listen on all interfaces and accept connections from anywhere
+ETCD_ADVERTISE_CLIENT_URLS="http://0.0.0.0:2379"
+```
+
+The master kubernetes nodes is the only place where we are going
+to be running ETCD.
+
+#### Configure API
+
+```bash
+vim /etc/kubernetes/apiserver
+
+# Accept connections from all interfaces
+KUBE_API_ADDRESS="--address=0.0.0.0"
+
+# Make sure that port for API is listening on 8080
+KUBE_API_PORT="--port=8080"
+
+# Make sure that port for Kubelet is listing on 10250
+KUBELET_PORT="--kubelet-port=10250"
+
+# Comma separated list of nodes in the etcd cluster
+KUBE_ETCD_SERVERS="--etcd-servers=http://127.0.0.1:2379"
+
+# Address range to use for services (Feel free to change it based on your environment)
+KUBE_SERVICE_ADDRESSES="--service-cluster-ip-range=10.254.0.0/16"
+
+# Add your own!
+KUBE_API_ARGS=""
+```
+
+#### Start the services
+
+First, you need to start with `etcd`:
+
+```bash
+systemctl enable etcd
+systemctl start etcd
+systemctl status etcd
+```
+
+Then, follow up with `kube-apiserver`:
+
+```bash
+systemctl enable kube-apiserver
+systemctl start kube-apiserver
+systemctl status kube-apiserver
+```
+
+Follow up with `kube controller manager`:
+
+```bash
+systemctl enable kube-controller-manager
+systemctl start kube-controller-manager
+systemctl status kube-controller-manager
+```
+
+Last, `kube-scheduler`:
+```bash
+systemctl enable kube-scheduler
+systemctl start kube-scheduler
+systemctl status kube-scheduler
+```
+
+Make sure that all of these 4 services are started. They **have** to be up and running
+otherwise, it makes no sense to ignore them and configure the minions. This is the univeral
+configuration for our cluster.
+
+### Configure Minions
+
+The following configuration has to be applied to all the minions
+of the cluster. The first thing we want to do is to apply our
+Kubernetes configuration:
+
+```bash
+vim /etc/kubernetes/config
+# logging to stderr means we get it in the systemd journal
+KUBE_LOGTOSTDERR="--logtostderr=true"
+
+# journal message level, 0 is debug
+KUBE_LOG_LEVEL="--v=0"
+
+# Disable privileged docker containers from running into the cluster
+KUBE_ALLOW_PRIV="--allow-privileged=false"
+
+# How the minion talks with the API Server
+KUBE_MASTER="--master=http://centos-master:8080"
+
+# How the minion talks with the ETCD Server
+KUBE_ETCD_SERVERe="--etcd-servers=http://centos-master:2379"
+```
+
+Next, we are going to edit the `kubelet` configuration:
+
+```bash
+vim /etc/kubernetes/kubelet
+
+# kubernetes kubelet (minion) config
+
+# The address for the info server to serve on (set to 0.0.0.0 or "" for all interfaces)
+KUBELET_ADDRESS="--address=0.0.0.0"
+
+# The port for the info server to serve on (it has to corresponds the port of the master)
+KUBELET_PORT="--port=10250"
+
+# You may leave this blank to use the actual hostname
+KUBELET_HOSTNAME="--hostname-override=centos-minion1"
+
+# location of the api-server
+KUBELET_API_SERVER="--api-servers=http://centos-master:8080"
+
+# Add your own!
+KUBELET_ARGS=""
+```
+
+
+Now start and enable the services:
+
+```bash
+systemctl enable kube-proxy
+systemctl start kube-proxy
+systemctl status kube-proxy
+```
+
+```bash
+systemctl enable kubelet
+systemctl start kubelet
+systemctl status kubelet
+```
+
+```bash
+systemctl enable docker
+systemctl start docker
+systemctl status docker
+```
+
+As soon as we verify that all of the are working as expedted, now we have
+to verify also that docker works. To do, I am going to use a simple
+containerized app, called `hello world` -- what a surprise.
+
+```bash
+docker pull hello-world
+docker images
+docker run hello-world
+docker ps
+docker ps -a
+```
+
+Now we have our minion configuration complete and actually it has to
+be registered against our master. Please make sure that the same config
+exists in the rest 2 minions, before you proceed.
+
+
