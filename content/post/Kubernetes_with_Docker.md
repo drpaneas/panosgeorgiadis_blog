@@ -1078,3 +1078,603 @@ we can selectively apply things like deployments to a specific Pod in my environ
 That is all what labels are for, to differentiate key-value pairs in YAML that later
 I can identify various parts. We can assign any label we want that we can refer to later.
 
+### Deployment
+
+One of the advantages of labelling is that we can use deployment type. Before, we just
+launched a Pod, but now we are going to launch a Deployment. The reason we are going to
+differenciate launching a Pod from a Deployment is because it gives us felxibility 
+and easier management over our cluter. This means that we are going to deploy a Pod
+that is goint to be a *production* `nginx server` container, and then we are going to
+deploy one that is going to be the development. Then we are going to label them
+appropriately so we can update one, and not the other. So let us copy the current
+configuration and modify it later on:
+
+```bash
+cp nginx-pod-label.yaml nginx-deployment-prod.yaml
+```
+
+Well, obviously the `kind` is going to change from `Pod` into `Deployment`, but before
+we do that, we have to change the `API` version. This is because we are not going to 
+use the standard API but some of the extensions which is available for Kubernetes.
+This extension gives us the ability to create a kind of deployment, as right now is
+only available to beta. Then, we are going to change the name into `nginx-deployment-prod`
+and also the same for the `app`. In addition, we are going to introduce a new key-value
+per, called `replicas` because deployments usually deploy multiple Pods in the same time.
+However, currently we just need only 1. The next thing we are going to add is a `template`.
+In this way, I am going to create `metadata` that are going to be specific to this item
+(template). All the others are intendted into the template. In that way we converted a
+Pod definition into a production deployment.
+
+```bash
+vim nginx-deployment-prod.yaml
+
+[root@drpaneas1 Builds]# cat nginx-deployment-prod.yaml 
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: nginx-deployment-prod
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: nginx-deployment-prod
+    spec:
+     containers:
+     - name: nginx
+       image: nginx:1.7.9
+       ports:
+       - containerPort: 80
+```
+
+Now let us create the deployment and list our Pods:
+
+```bash
+[root@drpaneas1 Builds]# kubectl create -f nginx-deployment-prod.yaml 
+[root@drpaneas1 Builds]# kubectl get pods
+NAME                                    READY     STATUS    RESTARTS   AGE
+nginx                                   1/1       Running   0          2h
+nginx-deployment-prod-872137609-z8n9m   1/1       Running   0          24s
+nginx2                                  1/1       Running   0          2h
+```
+
+Do you notice that next to the name, there is a `-872137609-z8n9m` string? Why is that?
+This is because it ends with the ID of the deployment:
+
+```bash
+[root@drpaneas1 Builds]# kubectl get deployments
+NAME                    DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE
+nginx-deployment-prod   1         1         1            1           1m
+```
+
+So now I have a deployment called `nginx-deployment-prod` which has a Pod
+called `nginx-deployment-prod-872137609-z8n9m`, which runs an `nginx` 
+container. Looks like we made things even more complicated ... Indeed.
+This is because nobody uses a deployment structure for just one nod
+with just one worker, with just one container. So, let us create another
+deployment so to see the benefit of it:
+
+```bash
+# cp nginx-deployment-prod.yaml nginx-deployment-dev.yaml
+```
+
+And let just modify the `nginx-deployment-prod` into `nginx-deployment-dev`.
+
+```bash
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: nginx-deployment-dev
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: nginx-deployment-dev
+    spec:
+     containers:
+     - name: nginx
+       image: nginx:1.7.9
+       ports:
+       - containerPort: 80
+```
+
+So, now both deployments are running:
+
+```bash
+[root@drpaneas1 Builds]# kubectl get deployments
+NAME                    DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE
+nginx-deployment-dev    1         1         1            1           15s
+nginx-deployment-prod   1         1         1            1           7m
+```
+
+and I can also do:
+
+```bash
+[root@drpaneas1 Builds]# kubectl describe deployments -l app=nginx-deployment-dev
+Name:                   nginx-deployment-dev
+Namespace:              default
+CreationTimestamp:      Wed, 31 May 2017 14:45:33 +0000
+Labels:                 app=nginx-deployment-dev
+Selector:               app=nginx-deployment-dev
+Replicas:               1 updated | 1 total | 1 available | 0 unavailable
+StrategyType:           RollingUpdate
+MinReadySeconds:        0
+RollingUpdateStrategy:  1 max unavailable, 1 max surge
+Conditions:
+  Type          Status  Reason
+  ----          ------  ------
+  Available     True    MinimumReplicasAvailable
+OldReplicaSets: <none>
+NewReplicaSet:  nginx-deployment-dev-3607872275 (1/1 replicas created)
+Events:
+  FirstSeen     LastSeen        Count   From                            SubObjectPath   Type            Reason                  Message
+  ---------     --------        -----   ----                            -------------   --------        ------                  -------
+  1m            1m              1       {deployment-controller }                        Normal          ScalingReplicaSet       Scaled up replica set nginx-deployment-dev-3607872275 to 1
+```
+
+So, we have 4 containers runnings, the dev and the prod. Why we did that?
+By using the deployment type, we can now do updates to any of our pods
+just by applying a deployment update to that specific pod. What this means?
+For example, we are going to update the `nginx` version to 1.8.
+
+```bash
+# cp nginx-deployment-dev.yaml nginx-deployment-dev-update.yaml
+```
+
+All we want to do is to update the nginx version from 1.7.9 up to 1.8 and I
+am going to do that by changing the image. Everything else will be the same.
+
+```bash
+vim nginx-deployment-dev-update.yaml
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: nginx-deployment-dev
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: nginx-deployment-dev
+    spec:
+     containers:
+     - name: nginx
+       image: nginx:1.8
+       ports:
+       - containerPort: 80
+```
+
+In that way we are going to `apply` this change into our `dev` deployment:
+
+```bash
+# kubectl apply -f nginx-deployment-dev-update.yaml 
+deployment "nginx-deployment-dev" configured
+```
+
+Now, the deployment has successfully created the Pod that now runs a 
+container with `nginx 1.8`. To verify this:
+
+```bash
+# kubectl describe deployments -l app=nginx-deployment-dev
+Name:                   nginx-deployment-dev
+Namespace:              default
+CreationTimestamp:      Wed, 31 May 2017 14:45:33 +0000
+Labels:                 app=nginx-deployment-dev
+Selector:               app=nginx-deployment-dev
+Replicas:               1 updated | 1 total | 1 available | 0 unavailable
+StrategyType:           RollingUpdate
+MinReadySeconds:        0
+RollingUpdateStrategy:  1 max unavailable, 1 max surge
+Conditions:
+  Type          Status  Reason
+  ----          ------  ------
+  Available     True    MinimumReplicasAvailable
+OldReplicaSets: <none>
+NewReplicaSet:  nginx-deployment-dev-3767386797 (1/1 replicas created)
+Events:
+  FirstSeen     LastSeen        Count   From                            SubObjectPath   Type            Reason                  Message
+  ---------     --------        -----   ----                            -------------   --------        ------                  -------
+  13m           13m             1       {deployment-controller }                        Normal          ScalingReplicaSet       Scaled up replica set ngi
+nx-deployment-dev-3607872275 to 1
+  6m            6m              1       {deployment-controller }                        Normal          ScalingReplicaSet       Scaled up replica set ngi
+nx-deployment-dev-3767386797 to 1
+  6m            6m              1       {deployment-controller }                        Normal          ScalingReplicaSet       Scaled down replica set n
+ginx-deployment-dev-3607872275 to 0
+```
+
+As you can see the `StrategyType` has changed into `RollingUpdate` and the
+`Replicas` say `1 updates` which means that it got succeded. Of course if
+we had mutliple replicas running, they will be updated as well. So, with one
+command I would be able to update the whole container infrastructure even
+though running in multiple places.
+
+### Replication Controller
+
+So far, we have been using only one Pod, but it is about time to use
+multiple pod (containers). There are two ways to run a Pod, either via
+a deployment or directly by referring to the Pod. The first way allows
+us to have multiple containers doing different things, for example
+you have a layered application running within a Pod, so you have a
+webserver and a fileserver and also a database server, and I use
+server in terms of individual containers. All those three run in a Pod,
+and this Pod might be called a webserver environment. Howerver, the
+second thing that you can do is t haty ou  can run multiple containers
+within a Pod, or at least you can defined multiuple containers within
+a single definition. They way we do that, is something called the
+replication controller. This is a different type of `kind` of the deployment
+kind in order to deploy 1-N pods for a particular container.
+
+First of all, let us start the other two minions. Just make sure that the
+VMs are online and `kubelet`, `kube-proxy` services are running:
+
+```bash
+systemctl start kubelet kube-proxy
+```
+
+then make sure you can see their online status from the master node:
+
+```bash
+# kubectl get nodes
+NAME             STATUS    AGE
+centos-minion1   Ready     1d
+centos-minion2   Ready     1d
+centos-minion3   Ready     1d
+```
+
+Now let us create the configuration:
+
+```bash
+vim nginx-multi-label.yaml
+```
+
+As I said earlier, we are going to use a different kind of kind, called
+`ReplicationController`. Then we define the name of this one as `nginx-www`
+and then we are writing the specifications. Over there, the first thing we do
+is to specify the `replicas`. In this case I am going to use *3* Pods per
+selector. Speaking of selector, we specify it as `app: nginx`. Next, we
+define our template. Nothing new here. In the end, the file looks like this:
+
+```bash
+# cat nginx-multi-label.yaml 
+apiVersion: v1
+kind: ReplicationController
+metadata:
+  name: nginx-www
+spec:
+  replicas: 3
+  selector:
+    app: nginx
+  template:
+    metadata:
+      name: nginx
+      labels:
+        app: nginx
+    spec:
+      containers:
+      - name: nginx
+        image: nginx
+        ports:
+        - containerPort: 80
+```
+
+Fire this up:
+
+```bash
+[root@drpaneas1 Builds]# kubectl create -f nginx-multi-label.yaml 
+replicationcontroller "nginx-www" created
+```
+
+Now if I ask for the pods:
+
+```bash
+[root@drpaneas1 Builds]# kubectl get pods
+NAME              READY     STATUS    RESTARTS   AGE
+nginx-www-m8x9q   1/1       Running   0          9m
+nginx-www-vkvw5   1/1       Running   0          9m
+nginx-www-xvjvb   1/1       Running   0          9m
+```
+
+I see 3 replicated copies being deployed all three of our container
+in all of three of our minions.
+
+```bash
+# kubectl get pods
+NAME              READY     STATUS    RESTARTS   AGE
+nginx-www-m8x9q   1/1       Running   0          9m
+nginx-www-vkvw5   1/1       Running   0          9m
+nginx-www-xvjvb   1/1       Running   0          9m
+[root@drpaneas1 Builds]# kubectl describe replicationcontroller
+Name:           nginx-www
+Namespace:      default
+Image(s):       nginx
+Selector:       app=nginx
+Labels:         app=nginx
+Replicas:       3 current / 3 desired
+Pods Status:    3 Running / 0 Waiting / 0 Succeeded / 0 Failed
+No volumes.
+Events:
+  FirstSeen     LastSeen        Count   From                            SubObjectPath   Type            Reason                  Message
+  ---------     --------        -----   ----                            -------------   --------        ------                  -------
+  10m           10m             1       {replication-controller }                       Normal          SuccessfulCreate        Created pod: nginx-www-xv
+jvb
+  10m           10m             1       {replication-controller }                       Normal          SuccessfulCreate        Created pod: nginx-www-vk
+vw5
+  10m           10m             1       {replication-controller }                       Normal          SuccessfulCreate        Created pod: nginx-www-m8
+x9q
+```
+
+The replication controller tells me that I have 3 of these running,
+but Ialso have 3 pods.
+
+```bash
+# kubectl describe pods | grep Node
+Node:           centos-minion3/172.31.23.169
+Node:           centos-minion2/172.31.110.96
+Node:           centos-minion1/172.31.120.121
+```
+
+As you can see, these 3 Pods are running into 3 different nodes. So, in every minion
+I have 2 containers as individual items, but they are all being controller by my
+YAML file for Kubernetes as replication controller. Now, as a replication controller
+Kubernetes gets services, but we have not defined any so far:
+
+```bash
+# kubectl get services
+NAME         CLUSTER-IP   EXTERNAL-IP   PORT(S)   AGE
+kubernetes   10.254.0.1   <none>        443/TCP   1d
+```
+
+Thus, the only service available is Kubernetes itself. In my cluster I have 3 pods,
+one pod per minion:
+
+```bash
+]# kubectl get pods
+NAME              READY     STATUS    RESTARTS   AGE
+nginx-www-m8x9q   1/1       Running   0          15m
+nginx-www-vkvw5   1/1       Running   0          15m
+nginx-www-xvjvb   1/1       Running   0          15m
+```
+
+So, what happens if I delete on of those Pods?
+
+```bash
+[root@drpaneas1 Builds]# kubectl get pods
+NAME              READY     STATUS    RESTARTS   AGE
+nginx-www-m8x9q   1/1       Running   0          15m  <--- delete this one
+nginx-www-vkvw5   1/1       Running   0          15m
+nginx-www-xvjvb   1/1       Running   0          15m
+
+[root@drpaneas1 Builds]# kubectl delete pod nginx-www-m8x9q
+pod "nginx-www-m8x9q" deleted
+
+[root@drpaneas1 Builds]# kubectl get pods
+NAME              READY     STATUS    RESTARTS   AGE
+nginx-www-b5h6t   1/1       Running   0          3s	<--- new pod
+nginx-www-vkvw5   1/1       Running   0          16m
+nginx-www-xvjvb   1/1       Running   0          16m
+```
+
+As you can see Kubernetes detected that a Pod got remoded from one of our minions
+and immediately detected that this is wrong, because it has to always run 3 of
+those. So, it automatically created a new one in order to apply the desired state
+in the cluster. No matter what I do, unless I delete the replication controller
+these Pods are going to be spawned up again again until it matches my YAML definition.
+This is:
+
+```bash
+# kubectl get replicationcontrollers
+NAME        DESIRED   CURRENT   READY     AGE
+nginx-www   3         3         3         19m
+```
+
+As you can see the desired state is `3` and I currently have `3`. So, Kubernetes
+is fine. But as I said, If I delete the replicationcontroller itself:
+
+```bash
+# kubectl delete replicationcontroller nginx-www
+replicationcontroller "nginx-www" deleted
+
+[root@drpaneas1 Builds]# kubectl get pods
+No resources found.
+```
+
+Then I have none. Also, in the individual minions, the containers are stopped.
+
+### Deploy Services
+
+We learned how to create, pods, deployments, replication controller, so far we can
+deploy one or more containers in a node replicated in our multi-node cluster. So
+lets us go ahead and re-run our configuration for our replication controller:
+
+Our `nginx-multi-label.yaml` deploys 3 replicas of an `nginx` container accross
+all 3 of our minions. Actually it does not neccessarrilly deploys that in all
+of our minions; if our minions are doing other things, it would round-robin
+those connections: if we had 4 minions, it would use 3, if we had 10 it would use
+3, etc. In this case, we have 3 minions completely empty, so it makes sense for
+Kubernetes to run one Pod on them:
+
+```bash
+# kubectl create -f nginx-multi-label.yaml 
+replicationcontroller "nginx-www" created
+```
+
+Since we have created the `replicationcontroller` we see our pods:
+
+```bash
+[root@drpaneas1 Builds]# kubectl get replicationcontrollers
+NAME        DESIRED   CURRENT   READY     AGE
+nginx-www   3         3         3         44s
+
+[root@drpaneas1 Builds]# kubectl get pods
+NAME              READY     STATUS    RESTARTS   AGE
+nginx-www-9v2lq   1/1       Running   0          50s
+nginx-www-ljpsz   1/1       Running   0          50s
+nginx-www-wcd1s   1/1       Running   0          50s
+```
+
+that are running. Now, We need to create a service definition. A service
+definition starts to tighted together. The services are not exposed outside
+of their host. However, when we define a service, we actually referring to
+a resource that can exist in any of our minions. It shoulds a little bit confusing.
+All I am doing is abstracting what is running behind the scenes, providing a mechanism
+for Kubernetes to simply assign a single IP address to those multiple Pods that we
+reffered to by name or label (in our `selector` field in YAML) so that we can
+connect to them and do something. They are going to have unique IP address and the
+subsquent assign port, so any of the hosts can use these and work with the entire cluster
+instead of just into their own local host.
+
+```bash
+vim nginx-service.yaml
+```
+
+```
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-service
+spec:
+  ports:
+  - port: 8000
+    targetPort: 80
+    protocol: TCP
+  selector:
+    app: nginx
+```
+
+So once again, here we are defining a kind `Service` that we are calling it `nginx-service`
+and then in the specification we are port forwarding the TCP 80 of nginx into our cluster
+port 8000 (I have to manually verify that nothing is running there). Then the application
+that I am going to run and provide access to, is defined by the label app. called `nginx`.
+
+```bash
+[root@drpaneas1 Builds]# kubectl  create -f nginx-service.yaml 
+service "nginx-service" created
+```
+
+So, let us see the services:
+
+```bash
+[root@drpaneas1 Builds]# kubectl get services
+NAME            CLUSTER-IP     EXTERNAL-IP   PORT(S)    AGE
+kubernetes      10.254.0.1     <none>        443/TCP    1d
+nginx-service   10.254.78.47   <none>        8000/TCP   5s
+```
+
+As you can see, I am running now 2 services. The kubernetes service and the `nginx-service`
+which runs at the port TCP 8000. Now, I can connect to any of my minions by referring just
+to this `10.254.78.47` IP Address and port 8000 and now I am load-balancing and round-robin
+among all three nginx-servers that are running in the background, without knowing their IP.
+In fact, their IP is likely the same of each of the individual minions.
+
+```bash
+[root@drpaneas1 Builds]# kubectl describe service nginx-service
+Name:                   nginx-service
+Namespace:              default
+Labels:                 <none>
+Selector:               app=nginx
+Type:                   ClusterIP
+IP:                     10.254.78.47
+Port:                   <unset> 8000/TCP
+Endpoints:              172.17.0.2:80,172.17.0.2:80,172.17.0.2:80
+Session Affinity:       None
+No events.
+```
+
+As you can see the `nginx-service` is running in my Cluster with the IP
+10.254.78.47 and it uses the port 8000 TCP. It says `<unset>` because
+I have not associated this port with something in my system. If I were
+using the port 80, then it would not say `unsert` by `http` instead.
+Notice that the `endpoints` for each minion, all of them have the
+very same IP Address. This would normally be a problem, but: Kubernetes
+is managing my configuration and its know manageing my connectvity on the
+backend through this cluster IP, now I have the ability to get information
+from any one of these, depending on which one is next up in the chain --
+it does not make any difference. So this is an easy way to load-balance
+your environment. You can use other load-balancers to do others things
+but what we are currently doing is round-robin load-balancing between
+these end-points on port 8000 for this particular IP.
+
+So how do I connect do? All this go back to `busybox` we did in the
+beginning.
+
+```bash
+[root@drpaneas1 Builds]# kubectl run busybox --generator=run-pod/v1 --image=busybox --restart=Never --tty -i
+Waiting for pod default/busybox to be running, status is Pending, pod ready: false
+Waiting for pod default/busybox to be running, status is Pending, pod ready: false
+If you dont see a command prompt, try pressing enter.
+/ # 
+```
+
+Now we can check the IP of our cluster on port 8000 to get back the
+nginx which runs on port 80.
+
+```bash
+/ # wget --quiet --output-document - http://10.254.78.47:8000
+<!DOCTYPE html>
+<html>
+<head>
+<title>Welcome to nginx!</title>
+<style>
+    body {
+        width: 35em;
+        margin: 0 auto;
+        font-family: Tahoma, Verdana, Arial, sans-serif;
+    }
+</style>
+</head>
+<body>
+<h1>Welcome to nginx!</h1>
+<p>If you see this page, the nginx web server is successfully installed and
+working. Further configuration is required.</p>
+<p>For online documentation and support please refer to
+<a href="http://nginx.org/">nginx.org</a>.<br/>
+Commercial support is available at
+<a href="http://nginx.com/">nginx.com</a>.</p>
+<p><em>Thank you for using nginx.</em></p>
+</body>
+</html>
+```
+
+If we wanted to we could have defined the cluster to have volume mount
+so that we could indicate which container we are pointed to, but in this
+case we did not execute any commands within our YAML to mount external
+directory for any of our nginx containers. This is why we are getting
+the same page back, there is no differenciation other than knowing that this
+particular cluster IP is point to a cluster of minions that we have
+configured to reffered to the backend Pods and their containers on Port 80
+through 8000 at this cluster IP. So, regardless of how many resources are
+running the backend, our service is associated with only one cluster IP address
+and I do not have to know anything about the backend. Not the containers, not
+their ports, nothing. So, as long as I have the cluster IP which I have to
+later register it via our DNS -- because this ClusterIP will be persistent
+only until it stopped. Once I stopped this, then my Cluster IP is going to go
+away:
+
+```bash
+[root@drpaneas1 Builds]# kubectl delete pod busybox
+pod "busybox" deleted
+
+[root@drpaneas1 Builds]# kubectl delete service nginx-service
+service "nginx-service" deleted
+```
+
+This just deletes the service, but not the Pods:
+
+```bash
+[root@drpaneas1 Builds]# kubectl get services
+NAME         CLUSTER-IP   EXTERNAL-IP   PORT(S)   AGE
+kubernetes   10.254.0.1   <none>        443/TCP   1d
+
+[root@drpaneas1 Builds]# kubectl get nodes
+NAME             STATUS    AGE
+centos-minion1   Ready     1d
+centos-minion2   Ready     1d
+centos-minion3   Ready     1d
+```
+
+The individual pods are continuing running as part of my multi-container
+deployment. Those individual pods are running, but now in order to communicate
+with them I have to launch busy-box and use their IP address of the particular
+container in order to access the nginx service within the Pod in the minion in
+which my busybox is running.
