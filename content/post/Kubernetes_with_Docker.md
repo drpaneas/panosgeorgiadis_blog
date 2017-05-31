@@ -541,4 +541,540 @@ Now we have our minion configuration complete and actually it has to
 be registered against our master. Please make sure that the same config
 exists in the rest 2 minions, before you proceed.
 
+### Interact with the cluster
+
+The main utility for interacting with the kubernetes cluster, is called
+`kubectl` -- kubecontrol.
+
+```bash
+man kubectl
+```
+
+Usually, either you **get** sth or **set** something. For example,
+if you want to see the nodes which are registerested againsto our
+master:
+
+```bash
+kubectl get nodes
+```
+
+But, how do I know what are the potential parameteres for that command?
+
+```bash
+man kubectl-get
+```
+
+For example, I can get some information about those nodes:
+
+```bash
+kubectl describe nodes
+```
+
+I can also request this in JSON format:
+
+```bash
+kubectl get nodes -o jsonpath='pattern'
+```
+
+In the future, we will do `kubectl get pods`. A minion is a node
+that is registered in our cluster in which we can install pods on.
+Pods contain containers of things, such as services (apache, ngix, etc).
+
+## Run Containers in Pods
+
+So, after having our environment set and all of our nodes are registered
+against the master node, it is about time to run containers inside of
+Pod in our cluster. For now, we are going to go through the initial
+configuration of setting up Pods in our 3 minions. For the shake of
+less complexity, I am going to turn-off the 2 out of the 3 minions,
+so I am going to to deploy Pods into a single node.
+
+```bash
+[root@drpaneas1 ~]# kubectl get nodes
+NAME             STATUS     AGE
+centos-minion1   Ready      19h
+centos-minion2   NotReady   19h
+centos-minion3   NotReady   19h
+```
+
+As I said, 3 minions are registered, but only one of them is ready
+to use.
+
+### Create a Pod
+
+First of all, we need to create a Build directory:
+
+```bash
+mkdir Builds
+cd Builds
+```
+
+Now there are two ways that we can begin to generate Pods which will
+contain Docker containers in our environment.
+
+1. We can create configuration file using JSON
+2. We can create configuration file using YAML
+
+From the configuration point of view, I am going to focus only to YAML.
+From a definition stand point, YAML is better for configuration and
+JSON is preffered as output. But, for input and configuration, I like
+to use YAML because I think it is simpler to use.
+
+So, to create a Pod, we need to create a *definition*. So, *keep in mind*
+that a Pod Definition is like telling Kubernetes the *desired state of 
+our Pod*. It is really important to understand that the desired state
+is a key concept, because it is the key reponsibility of Kubernetes to
+ensure that the current state of the cluster matches the defined as
+desired state. So, if any of the things in desired state is not functioning
+then it us up to Kubernetes to relocate them or recreated them in order
+to drive our cluster to the desired state until the administrator says
+otherwise (e.g. delete the Pod). So, I am going to create a very simple
+configuration for out first Pod, a `nginx` yaml configuration and also
+follow the examples from kubernetes documentation. Make sure you are
+into the `Builds` directory and create our first Pod definition:
+
+```bash
+vim nginx.yaml
+```
+
+I will create a Pod that has just one single container in it. The Pod will
+be named after `nginx` and so does the container also. In the container, I
+would like to run `nginx version 1.7.9` and port forward (expose) `TCP 80`.
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx
+spec:
+  containers:
+  - name: nginx
+    image: nginx:1.7.9
+    ports:
+    - containerPort: 80
+```
+
+Now, if you remember, using `kubectl` we can see what `pods` we have. So, right
+now we should not have any pods created yet. Also, if I go to our minion and
+look for currently active containers `docker ps` there will be none. So, the
+current state is that I have no `pods`, no `services`, no `replication controllers`.
+So, now, I am going to launch a Pod within my cluster, and Kubernetes is going
+to determine based on the current available worker nodes (minions) where to launch
+the container. It is very easy to do:
+
+```bash
+kubectl create -f ./nginx.yaml
+pod "nginx" created
+```
+
+So, if I check for Pod now in my cluster:
+
+```bash
+# kubectl get pods
+NAME      READY     STATUS    RESTARTS   AGE
+nginx     1/1       Running   0          26s
+```
+
+As you can see, my Pod called `nginx` is already running. Let us go to the minion
+and verify that the container `nginx` is also running:
+
+```bash
+[root@drpaneas2 ~]# docker ps
+CONTAINER ID        IMAGE                                      COMMAND                  CREATED       
+       STATUS              PORTS               NAMES
+9fc275cd7597        nginx:1.7.9                                "nginx -g 'daemon off"   About a minute
+ ago   Up About a minute                       k8s_nginx.b0df00ef_nginx_default_d4dfb568-45ec-11e7-91f
+e-0a35c9149e00_ece8325b
+bef1f611ff9b        gcr.io/google_containers/pause-amd64:3.0   "/pause"                 About a minute
+ ago   Up About a minute                       k8s_POD.b2390301_nginx_default_d4dfb568-45ec-11e7-91fe-
+0a35c9149e00_3ce7af06
+```
+
+Now there is our `nginx` container, but there is also another container that is
+neccessarry for Kubernetes, which is a `google_container` and it is under `pause`.
+If for example we want describe our current Pod, we can do:
+
+```bash
+[root@drpaneas1 Builds]# kubectl describe pod nginx
+Name:           nginx
+Namespace:      default
+Node:           centos-minion1/172.31.120.121
+Start Time:     Wed, 31 May 2017 10:35:14 +0000
+Labels:         <none>
+Status:         Running
+IP:             172.17.0.2
+Controllers:    <none>
+Containers:
+  nginx:
+    Container ID:               docker://9fc275cd7597e315a90826ac4558a5120fdca913bcc46e2895c608d0a0c36
+c1c
+    Image:                      nginx:1.7.9
+    Image ID:                   docker-pullable://docker.io/nginx@sha256:e3456c851a152494c3e4ff5fcc26f
+240206abac0c9d794affb40e0714846c451
+    Port:                       80/TCP
+    State:                      Running
+      Started:                  Wed, 31 May 2017 10:35:31 +0000
+    Ready:                      True
+    Restart Count:              0
+    Volume Mounts:              <none>
+    Environment Variables:      <none>
+Conditions:
+  Type          Status
+  Initialized   True 
+  Ready         True 
+  PodScheduled  True 
+No volumes.
+QoS Class:      BestEffort
+Tolerations:    <none>
+Events:
+  FirstSeen     LastSeen        Count   From                            SubObjectPath           Type Reason                   Message
+  ---------     --------        -----   ----                            -------------           --------      ------                  -------
+  4m            4m              1       {default-scheduler }                                    NormalScheduled               Successfully assigned nginx to centos-minion1
+  4m            4m              1       {kubelet centos-minion1}        spec.containers{nginx}  NormalPulling                 pulling image "nginx:1.7.9"
+  4m            4m              2       {kubelet centos-minion1}                                Warning               MissingClusterDNS       kubelet does not have ClusterDNS IP configured and cannot create Pod using "ClusterFirst" policy. Falling back to DNSDefault policy.
+  4m            4m              1       {kubelet centos-minion1}        spec.containers{nginx}  NormalPulled                  Successfully pulled image "nginx:1.7.9"
+  4m            4m              1       {kubelet centos-minion1}        spec.containers{nginx}  NormalCreated                 Created container with docker id 9fc275cd7597; Security:[seccomp=unconfined]
+  4m            4m              1       {kubelet centos-minion1}        spec.containers{nginx}  Normal
+Started                 Started container with docker id 9fc275cd7597
+```
+
+Some important information here is that you see the docker container `ID`
+that is running, the `minion` that is running and its IP Address. So far
+there are no `labels`, no `controllers` (e.g. we are not doing any
+replication). Just to be clear though:
+
+```bash
+# kubectl describe pod nginx | grep 'Node:\|IP:'
+Node:           centos-minion1/172.31.120.121 <-- IP of the minion
+IP:             172.17.0.2 <-- IP of the container inside the Pod
+```
+
+So, can I do anything with the IP of the container?
+
+```bash
+# ping 172.17.0.2
+PING 172.17.0.2 (172.17.0.2) 56(84) bytes of data.
+^C
+--- 172.17.0.2 ping statistics ---
+20 packets transmitted, 0 received, 100% packet loss, time 18999ms
+```
+
+The answer is *No*. There is no route externally to that Pod. But what
+I can do, is to run other containers within my Pod and as long as they
+are in the same host they can see those containers which are defined
+within that Pod. So, I am going to run another container: `busybox` image.
+This is very minimal installation of Linux running Busybox, that will
+allows us to connect/test our `nginx` container.
+
+Instead of creating a proper YAML file, this is just a shortcut, mostly
+because this is just for test reasons. So this is going to create a Pod
+called `busybox` and create also inside of it a docker container with
+the docker image `--image=busybox` and it will be also be
+an ephemeral `--restart=Never`. As soon as it will be ready it will be
+spawn interactivly here `--tty -i` and it runs in api version 1.
+
+```bash
+[root@drpaneas1 Builds]# kubectl run busybox --image=busybox --restart=Never --tty -i --generator=run-
+pod/v1
+Waiting for pod default/busybox to be running, status is Pending, pod ready: false
+Waiting for pod default/busybox to be running, status is Pending, pod ready: false
+If you dont see a command prompt, try pressing enter.
+/ # 
+```
+
+So, now we have two Pods into the same minion:
+
+```bash
+[root@drpaneas1 ~]# kubectl get nodes
+NAME             STATUS     AGE
+centos-minion1   Ready      20h
+centos-minion2   NotReady   20h
+centos-minion3   NotReady   20h
+
+[root@drpaneas1 ~]# kubectl get pods
+NAME      READY     STATUS    RESTARTS   AGE
+busybox   1/1       Running   0          14m
+nginx     1/1       Running   0          44m
+```
+
+This command prompt indicates that I am actually in the Pod `busybox` running a
+container in it. The point is that this container can now see the `nginx`
+
+```bash
+/ # wget --quiet --output-document - http://172.17.0.2
+<!DOCTYPE html>
+<html>
+<head>
+<title>Welcome to nginx!</title>
+<style>
+    body {
+        width: 35em;
+        margin: 0 auto;
+        font-family: Tahoma, Verdana, Arial, sans-serif;
+    }
+</style>
+</head>
+<body>
+<h1>Welcome to nginx!</h1>
+<p>If you see this page, the nginx web server is successfully installed and
+working. Further configuration is required.</p>
+<p>For online documentation and support please refer to
+<a href="http://nginx.org/">nginx.org</a>.<br/>
+Commercial support is available at
+<a href="http://nginx.com/">nginx.com</a>.</p>
+<p><em>Thank you for using nginx.</em></p>
+</body>
+</html>
+```
+
+In order to delete the `busybox` Pod, first we `exit` and then we issue
+the `delete` command:
+
+```bash
+[root@drpaneas1 Builds]# kubectl delete pod busybox
+pod "busybox" deleted
+```
+
+So now if we go back to the minion and look for the busybox container, we will
+see that it has been already stopped:
+
+```bash
+[root@drpaneas2 ~]# docker ps
+CONTAINER ID        IMAGE                                      COMMAND                  CREATED       
+      STATUS              PORTS               NAMES
+9fc275cd7597        nginx:1.7.9                                "nginx -g 'daemon off"   47 minutes ago
+      Up 47 minutes                           k8s_nginx.b0df00ef_nginx_default_d4dfb568-45ec-11e7-91fe
+-0a35c9149e00_ece8325b
+bef1f611ff9b        gcr.io/google_containers/pause-amd64:3.0   "/pause"                 47 minutes ago
+      Up 47 minutes                           k8s_POD.b2390301_nginx_default_d4dfb568-45ec-11e7-91fe-0
+a35c9149e00_3ce7af06
+```
+Now let us also remove the nginx container:
+
+``bash
+kubectl delete pod nginx
+[root@drpaneas1 Builds]# kubectl delete pod nginx
+pod "nginx" deleted
+```
+
+I can also `cheat` in a way in order to get access to the services that might be
+running on one of my containers. This is by port-forwarding locally to a remote
+copy of what happens to be happen within our Pod. So, because we already removed
+the `nginx` pod. I am going to create one again:
+
+```bash
+[root@drpaneas1 Builds]# kubectl create -f ./nginx.yaml 
+pod "nginx" created
+[root@drpaneas1 Builds]# kubectl get pods
+NAME      READY     STATUS    RESTARTS   AGE
+nginx     1/1       Running   0          17s
+```
+
+So, now let us port forward it locally:
+
+```bash
+[root@drpaneas1 Builds]# kubectl port-forward nginx :80 &
+[1] 2512
+[root@drpaneas1 Builds]# Forwarding from 127.0.0.1:43873 -> 80
+Forwarding from [::1]:43873 -> 80
+```
+
+As you can see I am now port forwarding the port 80 from the Pod
+`nginx` into my local port `43873`. So, I should be able to do:
+
+```bash
+[root@drpaneas1 Builds]# curl http://localhost:43873
+Handling connection for 43873
+<!DOCTYPE html>
+<html>
+<head>
+<title>Welcome to nginx!</title>
+<style>
+    body {
+        width: 35em;
+        margin: 0 auto;
+        font-family: Tahoma, Verdana, Arial, sans-serif;
+    }
+</style>
+</head>
+<body>
+<h1>Welcome to nginx!</h1>
+<p>If you see this page, the nginx web server is successfully installed and
+working. Further configuration is required.</p>
+<p>For online documentation and support please refer to
+<a href="http://nginx.org/">nginx.org</a>.<br/>
+Commercial support is available at
+<a href="http://nginx.com/">nginx.com</a>.</p>
+<p><em>Thank you for using nginx.</em></p>
+</body>
+</html>
+```
+
+So now we have a Pod Definition created but one of the things we do not have
+is an easy way to talk about what that Pod is all about and what it might
+contain. So, I am goin to apply labels and selectors.
+
+### Labels and Selectors
+
+Labels are often reffered to as `tags` in order to differentiate more easily
+the Pods running in our system. Because you might run some thousands of Pods
+in your system, so it makes sense to apply some common naming scheme to know
+how you can sort the information that is available. All that a label does
+is to give us a easy-readable plain text to something we can refer to later.
+It is a key value that we can also define in our YAML file, and we can also
+use it later to get or set information.
+
+```bash
+# cp nginx.yaml nginx-pod-label.yaml 
+[root@drpaneas1 Builds]# vim nginx-pod-label.yam
+```
+
+All we are going to add is a section `labels` and give a name for the `app`
+that we are going to run (in that case `nginx`).
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx
+  labels:
+    app: nginx
+spec:
+  containers:
+  - name: nginx
+    image: nginx:1.7.9
+    ports:
+    - containerPort: 80
+```
+
+And create the Pod:
+
+```bash
+[root@drpaneas1 Builds]# kubectl create -f nginx-pod-label.yaml 
+pod "nginx" created
+[root@drpaneas1 Builds]# kubectl get pods
+NAME      READY     STATUS    RESTARTS   AGE
+nginx     1/1       Running   0          9s
+```
+
+Now, what I can do (that I could not do it before) is to ask
+for a specific key-value pair, called `nginx`:
+
+```bash
+[root@drpaneas1 Builds]# kubectl get pods -l app=nginx
+NAME      READY     STATUS    RESTARTS   AGE
+nginx     1/1       Running   0          1m
+```
+
+Let us create another nginx app:
+
+```bash
+[root@drpaneas1 Builds]# cp nginx-pod-label.yaml nginx2-pod-label.yaml 
+[root@drpaneas1 Builds]# vim nginx2-pod-label.yaml 
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx2
+  labels:
+    app: nginx2
+spec:
+  containers:
+  - name: nginx2
+    image: nginx:1.7.9
+    ports:
+    - containerPort: 80
+```
+
+As you can see I had to change `nginx` into `nginx2`. Let us create is also:
+
+```bash
+[root@drpaneas1 Builds]# kubectl create -f nginx2-pod-label.yaml 
+pod "nginx2" created
+[root@drpaneas1 Builds]# kubectl get pods
+NAME      READY     STATUS    RESTARTS   AGE
+nginx     1/1       Running   0          4m
+nginx2    1/1       Running   0          9s
+```
+
+This also means that in our minion, we are running now 4 containers:
+
+```bash
+[root@drpaneas2 ~]# docker ps
+CONTAINER ID        IMAGE                                      COMMAND                  CREATED       
+      STATUS              PORTS               NAMES
+f9007379f757        nginx:1.7.9                                "nginx -g 'daemon off"   50 seconds ago
+      Up 49 seconds                           k8s_nginx2.428f0121_nginx2_default_5f91234f-45f6-11e7-91
+fe-0a35c9149e00_ad9421e1
+75c528f64f3f        gcr.io/google_containers/pause-amd64:3.0   "/pause"                 50 seconds ago
+      Up 49 seconds                           k8s_POD.b2390301_nginx2_default_5f91234f-45f6-11e7-91fe-
+0a35c9149e00_1cf67320
+b1582754a595        nginx:1.7.9                                "nginx -g 'daemon off"   5 minutes ago 
+      Up 5 minutes                            k8s_nginx.b0df00ef_nginx_default_b4dcc3c9-45f5-11e7-91fe
+-0a35c9149e00_8810d6a3
+e98169846a83        gcr.io/google_containers/pause-amd64:3.0   "/pause"                 5 minutes ago 
+      Up 5 minutes                            k8s_POD.b2390301_nginx_default_b4dcc3c9-45f5-11e7-91fe-0
+a35c9149e00_e2f1104f
+```
+
+So, why would I do it that way? We might have thousands of pods running.
+So let us use again the listing for the `app` key-pair-value:
+
+```bash
+[root@drpaneas1 Builds]# kubectl get pods -l app=nginx2
+NAME      READY     STATUS    RESTARTS   AGE
+nginx2    1/1       Running   0          2m
+```
+
+This is cool, because now I can only get the description per app, in that
+case `nginx2`:
+
+```bash
+[root@drpaneas1 Builds]# kubectl describe pods -l app=nginx2
+Name:           nginx2
+Namespace:      default
+Node:           centos-minion1/172.31.120.121
+Start Time:     Wed, 31 May 2017 11:43:32 +0000
+Labels:         app=nginx2
+Status:         Running
+IP:             172.17.0.3
+Controllers:    <none>
+Containers:
+  nginx2:
+    Container ID:               docker://f9007379f7572c49769164d9b31d9814cd30404ab93c8b73258b672fba449
+205
+    Image:                      nginx:1.7.9
+    Image ID:                   docker-pullable://docker.io/nginx@sha256:e3456c851a152494c3e4ff5fcc26f
+240206abac0c9d794affb40e0714846c451
+    Port:                       80/TCP
+    State:                      Running
+      Started:                  Wed, 31 May 2017 11:43:33 +0000
+    Ready:                      True
+    Restart Count:              0
+    Volume Mounts:              <none>
+    Environment Variables:      <none>
+Conditions:
+  Type          Status
+  Initialized   True 
+  Ready         True 
+  PodScheduled  True 
+No volumes.
+QoS Class:      BestEffort
+Tolerations:    <none>
+Events:
+  FirstSeen     LastSeen        Count   From                            SubObjectPath           Type Reason                   Message
+  ---------     --------        -----   ----                            -------------           --------      ------                  -------
+  4m            4m              1       {default-scheduler }                                    NormalScheduled               Successfully assigned nginx2 to centos-minion1
+  4m            4m              2       {kubelet centos-minion1}                                Warning               MissingClusterDNS       kubelet does not have ClusterDNS IP configured and cannot create Pod using "ClusterFirst" policy. Falling back to DNSDefault policy.
+  4m            4m              1       {kubelet centos-minion1}        spec.containers{nginx2} NormalPulled                  Container image "nginx:1.7.9" already present on machine
+  4m            4m              1       {kubelet centos-minion1}        spec.containers{nginx2} NormalCreated                 Created container with docker id f9007379f757; Security:[seccomp=unconfined]
+  4m            4m              1       {kubelet centos-minion1}        spec.containers{nginx2} Normal
+Started                 Started container with docker id f9007379f757
+```
+
+This is an easy way to refer to complex infrastucture that I am  virtualizing as
+a container in my cluster. So these tags or labels are what is called selectors
+when we are getting information or when we apply information to a pod. This is because
+we can selectively apply things like deployments to a specific Pod in my environment.
+That is all what labels are for, to differentiate key-value pairs in YAML that later
+I can identify various parts. We can assign any label we want that we can refer to later.
 
