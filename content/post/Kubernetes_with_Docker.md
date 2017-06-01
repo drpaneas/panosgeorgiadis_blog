@@ -1678,3 +1678,388 @@ deployment. Those individual pods are running, but now in order to communicate
 with them I have to launch busy-box and use their IP address of the particular
 container in order to access the nginx service within the Pod in the minion in
 which my busybox is running.
+
+## Logs Logs Logs
+
+How can I pull logs from my Pods? There is a facility that is provided as
+part of the `kubectl` utility.
+
+```bash
+# kubectl logs <pod>
+```
+
+I can also specify the number of lines I want to see:
+
+```
+bash
+# kubectl logs --tail=1 <pod>
+```
+
+You can also specify  the time-frame you want to see the logs:
+
+```bash
+# kubectl logs --since=24h <pod>
+```
+
+Finally, if I want to live monitor the logs:
+
+```bash
+# kubectl logs -f <pod>
+```
+
+If I want to see the logs on a particular container I need to now the container
+ID (CID):
+
+```bash
+# kubectl logs -f -c CID <pod>
+```
+
+For example, if you try to start a docker image that does not exists
+you will see:
+
+```bash
+# kubectl run apache --image=apache --port=80 --labels=app=apache
+deployment "apache" created
+
+[root@drpaneas1 Builds]# kubectl get pods
+NAME                      READY     STATUS         RESTARTS   AGE
+apache-2837101164-qxqlv   0/1       ErrImagePull   0          7s
+
+[root@drpaneas1 Builds]# kubectl logs apache-2837101164-qxqlv
+Error from server (BadRequest): container "apache" in pod "apache-2837101164-qxqlv" is waiting to start: image cant be pulled
+```
+
+This is very useful because you can generate health reports for your services.
+You can also specify things like 'if this thing happens' then re-reploy this service.
+
+## Scalability of the cluster
+
+We have control over the initial scalability of our cluster when we create Pods
+inside of either deployments, Pod definitions, Replica sets or ReplicationControllers.
+But what happens if the initial configuration that we have set inside of our definition
+needs to be adjusted for one reason or another, or we want to add scalling to a deployment
+that has not had one in the past. We can use something that is called the
+`autoscale` directive in order to add and autoscale our definition. We can define
+a minimum state (the minimum number of Pods) that should be running in any particular
+time, as well as the maximum state (the maximum number of pods) andthen we can also
+target various CPU utilization thresholds in order to deploy additional services.
+In other words, once we get to 80% CPU utilization on a minion that it has pods on it,
+then it will create the next set of Pods on a different minion for example.
+
+We could create a set of Pods based on a ReplicationController set that already has defined
+a number of replicas in it. For example, in the `nginx-multi-label.yaml` we have indicated
+that we want 3 replicas of this particular pod running in our infrastructure. Right now
+we have got two minions available to us (I have taken the 3rd minion offline), so let
+us create a temporary pod using the `kubectl run` command. We are going to create a basic
+pod that is going to have a single container in it that is going to run an `nginx` image.
+We are also going to expose port 80, so our containers will be able to connect to the
+service running there. Last but not least, I am not going to indicate a number of replicas
+on purpose.
+
+```bash
+[root@drpaneas1 Builds]# kubectl run myautoscale --image=nginx --port=80 --labels=app=myautoscale
+deployment "myautoscale" created
+```
+
+As we saw before, `kubectl run` creates a deployment. A deployment is something that
+once it has been defined, we can apply changes to it.
+
+```bash
+# kubectl get deployments
+NAME          DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE
+myautoscale   1         1         1            1           1m
+```
+
+This is running just one pod on the `minion1`:
+
+```bash
+# kubectl describe pods -l app=myautoscale | grep Node:
+Node:           centos-minion1/172.31.120.121
+```
+
+Which means that is running 2 docker containers:
+
+```bash
+# docker ps
+CONTAINER ID        IMAGE                                      COMMAND                  CREATED             STATUS              
+PORTS               NAMES
+1bd5a0915963        nginx                                      "nginx -g 'daemon off"   5 minutes ago       Up 5 minutes        
+                    k8s_myautoscale.f898ffdc_myautoscale-3958947512-3p5l4_default_ffa4bfb9-46fa-11e7-8983-0a35c9149e00_8d846e33
+40c5b1cf3a4d        gcr.io/google_containers/pause-amd64:3.0   "/pause"                 5 minutes ago       Up 5 minutes        
+                    k8s_POD.b2390301_myautoscale-3958947512-3p5l4_default_ffa4bfb9-46fa-11e7-8983-0a35c9149e00_4cb76f9d
+```
+
+Now, I may need to autoscale this depending upon various conditions. The one that I have
+complete control is the amount of CPU that is utilized in within my cluster. For this
+I am going to use the `autoscale` directive. First I need to know the name of the deployment
+(in my case `myautoscale`) and then I need to spacify at least on parameter. I am going to
+say I need to deploy at least 2 pods (because I know already I have 2 minions to utilize)
+and I am going to also say that I would like to have a maximum deployment of 6 pods.
+And last but not least, my CPU percent is goingto be equal to some number (`--cpu-precent`)
+but since the cpu load on my minions is really low, I know that  I am not going to utlize
+this, so I am going to skip this and use the default scaling police. The default policy says
+that when the number of pods exceeds the number of resources on the minion (or it stops
+responding) then it will spin up new pods in on other minions. So, it should automatically
+scale up to at least 2 pods.
+
+```bash
+# kubectl autoscale deployments myautoscale --min=2 --max=6
+deployment "myautoscale" autoscaled
+```
+
+That is it. My deployment called `myautoscale` is now *autoscalling*.
+I see that I have now at least two pods running:
+
+```bash
+# kubectl get pods
+NAME                           READY     STATUS    RESTARTS   AGE
+myautoscale-3958947512-3p5l4   1/1       Running   0          16m
+myautoscale-3958947512-lt2cg   1/1       Running   0          43s
+```
+
+The second pod is not running on the second minion as well:
+
+```bash
+# kubectl describe pods -l app=myautoscale | grep Node:
+Node:           centos-minion1/172.31.120.121
+Node:           centos-minion2/172.31.110.96
+```
+
+And of course the deployment has changed:
+
+```bash
+# kubectl get deployments
+NAME          DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE
+myautoscale   2         2         2            2           18m
+```
+
+Now, if I want to have at least *4* pods as minimum in my deployments,
+I can simply re-run the previous command by changing the `--min`
+parameter.
+
+```bash
+# kubectl autoscale deployments myautoscale --min=4 --max=6
+Error from server (AlreadyExists): horizontalpodautoscalers.autoscaling "myautoscale" already exists
+```
+
+But I got an error. What this means? So, what that means is that I have
+changed my deployment to an `autoscale` and once the autoscale exists,
+just like a pod that is called 123, I cannot create another one called 123,
+that means that I do not have the ability to scale further my current environment
+without deleting it. I can apply a different directive called `scale`. So,
+up to these point, I already have an *autoscale* but I also need to *scale*
+it further. In that case I have first to tell it what is my current auto-scale
+plan (`--current-replicas=2) and then the target I want to scale into.
+
+```bash
+# kubectl scale --current-replicas=2 --replicas=4 deployment/myautoscale
+deployment "myautoscale" scaled
+```
+
+This applies my new rule without changing the fact that `autoscale` has already
+been deployed. When I applied my autoscale, autoscaled was **created**, but all I
+am doing now is that I applying a change (I am not re-creating something).
+
+```bash
+# kubectl get deployments
+NAME          DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE
+myautoscale   4         4         4            4           26m
+```
+
+As you can see, my deployment has not changed to 4 replicas. Two of them on
+minion1 and two of them on minion2.
+
+```bash
+# kubectl describe pods -l app=myautoscale | grep Node:
+Node:           centos-minion1/172.31.120.121
+Node:           centos-minion2/172.31.110.96
+Node:           centos-minion1/172.31.120.121
+Node:           centos-minion2/172.31.110.96
+```
+
+Now the question is: *can I scale down?*. Yes but there is a limitation
+to what you can scale down to. You cannot scale pass the point when you
+applied the autoscale to `--min` value. In other words, I cannot apply a
+scale rule that has a lower value than 2. Because when I originally applied
+the autoscale, I said that I wantto have 2 minimum pods. So, even if I now say
+that I want to scale down to 1, it will still deploy 2. But, I can scale down
+to 3.
+
+```bash
+# kubectl scale --current-replicas=4 --replicas=3 deployment/myautoscale
+deployment "myautoscale" scaled
+
+[root@drpaneas1 Builds]# kubectl get pods
+NAME                           READY     STATUS    RESTARTS   AGE
+myautoscale-3958947512-3p5l4   1/1       Running   0          31m
+myautoscale-3958947512-lt2cg   1/1       Running   0          15m
+myautoscale-3958947512-mkqv4   1/1       Running   0          6m
+```
+
+The cluster is terminating the instances that have been running for
+the shortest amount of time. Many people thing that Kubernetes terminates the latest
+instance, but this is not true. If you for example restart you first instance
+the running time of it is going to go back to zero, so, this is goingto be
+terminated first in a scenario like that (scale down).
+
+So what is is important to keep in mind is that as long as I have a deployment
+or a replicaset or a replication controller definition, no matter if I am
+doing this automatically or via a YAML file, I can autoscale that by applying
+an autoscale defintion into it, and then I can further scale it by using
+scale. But I cannot go lower than my original minimum limit.
+
+If now I fire up my 3rd minion, then Kubernetes will understand that my environment
+has now the capacity to run more minions:
+
+
+
+## Failure and Recovery
+
+**Before version 1.5**
+
+Kubernetes has the ability to detect when something has failed and the ability
+to recover when this failure has been corrected an then to react to that failure
+by taking action. One of the things to keep in mind, is that parts of the
+underlying functionality is that one a Pod has been deployed to a minion, it is
+guaranteed to be on that particular minion for its entire lifecycle. That means
+until the Pod is deleted, you will always have that Pod there. That means, in
+case of a failure, the Pod is just going to go down, but not picked up and moved
+somewhere else. The reason is double:
+
+1. There might be IP Addresses and back-end services which that Pod is tight to
+that particular minion (e.g. volume mounts) -- such stuff are not portable
+between minions; because it cannot depend upon minion configuration.
+
+2. Other pods that exists on that host, espect to have access to those recourses
+but if it moves somewhere else, then other Pods on that minion, if it was a
+service failure and you just re-deployed the Pod to a different minion in order
+to recover, would not neccessarrily have access to that resources.
+
+But the recovery works OK, because the Pod will be re-deployed in its entirety
+and its exact configuration once the minion is available. So let us go ahead
+and deploy a deployment which has at least 2 Pod on each of the two minions
+we have in our configuration right now.
+
+```bash
+# kubectl run myrecovery --image=nginx --port=80 --replicas=2 --labels=app=myrecovery
+deployment "myrecovery" created
+
+[root@drpaneas1 ~]# kubectl get deployments
+NAME         DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE
+myrecovery   2         2         2            2           25s
+```
+
+My deployment `myrecovery` has been created. Now if I want to scale this up
+or down we can apply an `autoscale` definition to it. Anyways, looking
+what is running in our minions, we see that in every minion there are
+2 containers. One for apache and one for google. So, we are running 4
+containers in total.
+
+minion_1
+
+```bash
+[root@drpaneas2 ~]# docker ps
+CONTAINER ID        IMAGE                                      COMMAND                  CREATED             STATUS              
+PORTS               NAMES
+e7ce117e9c0f        nginx                                      "nginx -g 'daemon off"   31 seconds ago      Up 30 seconds       
+                    k8s_myrecovery.1371ff8a_myrecovery-3755654676-qfc71_default_481562fa-46f2-11e7-8983-0a35c9149e00_9b42bd0c
+e1f60db6cd12        gcr.io/google_containers/pause-amd64:3.0   "/pause"                 32 seconds ago      Up 31 seconds       
+                    k8s_POD.b2390301_myrecovery-3755654676-qfc71_default_481562fa-46f2-11e7-8983-0a35c9149e00_e69fa223
+```
+
+minion_2
+
+```bash
+CONTAINER ID        IMAGE                                      COMMAND                  CREATED              STATUS              PORTS     
+          NAMES
+d0cf0b3c8c3b        nginx                                      "nginx -g 'daemon off"   About a minute ago   Up About a minute             
+          k8s_myrecovery.1371ff8a_myrecovery-3755654676-t4064_default_48158b96-46f2-11e7-8983-0a35c9149e00_e04e7997
+715206a85679        gcr.io/google_containers/pause-amd64:3.0   "/pause"                 About a minute ago   Up About a minute             
+          k8s_POD.b2390301_myrecovery-3755654676-t4064_default_48158b96-46f2-11e7-8983-0a35c9149e00_ab638246
+```
+
+Also, just to clarify that I am using only two minion, and not 3.
+
+```bash
+kubectl get nodes
+NAME             STATUS    AGE
+centos-minion1   Ready     10m
+centos-minion2   Ready     10m
+```
+
+So, now the question is *what happens if one of those servers go down?*
+The behavior might be a little bit different from what someone whould
+expect from Kubernetes. So let us go to the *minion_1* and shutdown
+the services: `docker`, `kubelet`, `kube-proxy`.
+
+```bash
+# systemctl stop docker kubelet kube-proxy
+```
+
+As a result, now this minion cannot register with `etcd` daemon running
+in my master controller and cannot report to it. Back to the master
+controller, it is going to take up to *minute* to its `etcd` to pick
+up the fact that *minion_1* is no longer available. So, for some time
+frame kubectl will print wrong information about running Pods and
+connected nodes. But as I said, after some time, it picks up the failure:
+
+```bash
+[root@drpaneas1 Builds]# kubectl get nodes
+NAME             STATUS     AGE
+centos-minion1   NotReady   16m
+centos-minion2   Ready      15m
+```
+
+So additional implementations will all go to *minion2* because it is the only
+one reporting as ready. But what I would expect from Kubernetes is to make sure
+that whatever was running minion1, it will be moved to minion2. But it does not.
+And this is for the reason I told you before. Because this pod might have containers
+which utilize dependencies on the underlying minion host and/or may have other pods
+that need access to those services. In that case the pod would have attempted to be
+restarted because I have applied replicas to it, but that **only** applies when a
+failed replica gets restarted on its original minion. So, in this case, if the
+original host is not available, you never gonna see the pod to move to minion1
+in order to match the desired state of replica 2.
+
+As soon as you start the services in minion1, Kubernetes will detect this
+and respawn the Pod in minion1.
+
+**After Kuberentes 1.5**
+
+With the introduction of version 1.5, there is a notable change in this behavior.
+Kubernetes quickly detects that a node is down, and it marks that Pod as in unknown
+state for some minutes. If the minion is not getting up, then Kuberentes moves this pod
+into another minion.
+
+```bash
+[root@drpaneas1 Builds]# kubectl get pods
+NAME                          READY     STATUS    RESTARTS   AGE
+myrecovery-3755654676-b7fvz   1/1       Running   0          3m
+myrecovery-3755654676-qfc71   1/1       Unknown   0          13m  <--- Dead Node
+myrecovery-3755654676-t4064   1/1       Running   0          13m
+```
+
+After re-activating the minion1, Kubernetes removes the failed pod
+(in that case `qfc71`) completely and keeps maintaining the new pod
+(with new ID `b7fvz`) on minion2. So, you end up with 4 containers
+running in the same host.
+
+minion1:
+
+```bash
+[root@drpaneas2 ~]# docker ps
+CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS               NAMES
+```
+
+minion2:
+
+```bash
+# docker ps -q
+d43d52fc738d
+f73b10adb841
+d0cf0b3c8c3b
+715206a85679
+``` 
+
+However, if you run this as a service, then you do not actually care because
+it uses load-balancing round-robin.
