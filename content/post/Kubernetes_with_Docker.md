@@ -2,105 +2,13 @@
 categories = ["tutorial"]
 date = "2017-05-08T22:08:35+02:00"
 tags = ["tutorial", "kubernetes", "docker", "containers", "cluster"]
-title = "Kubernetes with Docker"
+title = "Kubernetes Basics"
 
 +++
 
-## Course Syllabus
-
-### Introduction
-
-In the introduction we are going to talk about the syllabus. We are also going
-to talk about Kubernetes in order to get you familiar with what we are going to
-see later. Then we are going to see what Docker is why this is the preferred
-technology that is preffered for Kubernes to manage. Talk a little bit about
-containers versus virtual machines and their key differences. Then talk a little
-bit about containers in order to have an understanding of how they operating not
-inside Kubernetes but within a host. We will talk a little bit about DockerHub.
-That we will dive back to Kubernetes and talk about its architecture since we now
-know more about Docker. Also talk about YAML which is used to build configuration
-files for Kubernetes.
-
-* Course Syllabus
-* Introduction to Kubernetes
-* What is Docker?
-* Container vs VMs
-* Docker Architecture
-* The DockerHub
-* Kubernetes Architecture
-* Introduction to YAML
-
-### Setup and Configuration
-
-Then we will be having a section of Setup and Configuration about packages and the
-dependencies we need to install in different pieces of our system, mainly the master
-and the minions. We will install and configure the Kube Master and the Kube Minions
-(nodes). And then, when we have that done we will use the native k8s main facility
-environment for querying and running and verifying that our configuration meets our
-expectations.
-
-* Packages and Dependencies
-* Install and Configure Kube Master
-* Install and Configure Kube Minions (Nodes)
-* Kubctl: Querying and Running Environment
-
-### Docker Fundamentals
-
-As soon as this is done, we have to spend some time to see some Docker fundamentals.
-This is not going to be a deep learning course, but that depends on the time and on
-your curiosity. We will pull an image, we will build a container from that image and
-then customize it to our needs. That will give you a fundamental level of
-understanding the rest of the Kubernetes.
-
-* Pulling an Image
-* Running a Container from an Image
-* The Dockerfile
-* Building a Custom Image from a Dockerfile
-
-### Pods, Tags, Labels and Services
-
-Then we will move back to Kubernetes talk a little bit more about pods, tags, labels
-and and services. We will create and deploy a Pod Definition -- which is the reason we
-did the introduction to YAML -- we will create and deploy a service, and talk about
-how to use our containers to use these services. We will talk about how to view Pods
-and their characteristics using the K8s toolset.Then we will look how the docker
-containers look when they have been deployed by K8s on the individual minions, so you
-understand what pieces you have to run and how it looks like.
-
-* Create and Deploy a Pod Definition
-* Create and Deploy a Service
-* How to Use Services
-* Viewing Pod and Service Characteristics
-* Docker Containers Running on Minions
-* Tags and Labels
-
-### Clusters
-
-Then we will move on into clusters and we will talk about how we define a state.
-Ultimately K8s drives our cluster environment to a stated configuration and maintains
-the number of Pods and containers based on the configuration we have set. So, we will
-create a cluster environment and then we will see how we can manage that. We will talk
-about replication and the controller which is involved in replicating our Pod and
-Containers in different minions. We will talk how we can scale our application both in
-terms of an existing cluster and new clusters so that is scales up approrpriately. We
-will also look how the recovery process takes place in the k8s environment and see how
-k8s moves the workload to another Pod (self-healing). And then we will look at our error
-reporting and logging options.
-
-* Driving to a Defined State
-* Creating a Clustered Container Environment
-* Managing our cluster
-* Replication
-* Scaling
-* Self-Healing
-* Error reporting and logging
-
-Last, we will dig into some use cases, such as setup an Apache WebSite Cluster and and
-Guestbook (Multiple Services) implemention from the K8s website.
-
 ## What is Kubernetes
 
-By definition, Kubernetes is an open source container cluster manager, and it's
+By definition, Kubernetes is an open source container cluster manager, and it is
 usually referred to by its internal name withing Google development - **k8s**.
 Google donated it to the open source world as a *"seed technology"* at 2015, to
 the newly formed *CNCF - Cloud Native Computing Foundation*, which established
@@ -680,13 +588,10 @@ and verify that the container `nginx` is also running:
 
 ```bash
 [root@drpaneas2 ~]# docker ps
-CONTAINER ID        IMAGE                                      COMMAND                  CREATED       
-       STATUS              PORTS               NAMES
-9fc275cd7597        nginx:1.7.9                                "nginx -g 'daemon off"   About a minute
- ago   Up About a minute                       k8s_nginx.b0df00ef_nginx_default_d4dfb568-45ec-11e7-91f
+CONTAINER ID        IMAGE                                      COMMAND                  CREATED              STATUS              PORTS               NAMES
+9fc275cd7597        nginx:1.7.9                                "nginx -g 'daemon off"   About a minute ago   Up About a minute                       k8s_nginx.b0df00ef_nginx_default_d4dfb568-45ec-11e7-91f
 e-0a35c9149e00_ece8325b
-bef1f611ff9b        gcr.io/google_containers/pause-amd64:3.0   "/pause"                 About a minute
- ago   Up About a minute                       k8s_POD.b2390301_nginx_default_d4dfb568-45ec-11e7-91fe-
+bef1f611ff9b        gcr.io/google_containers/pause-amd64:3.0   "/pause"                 About a minute ago   Up About a minute                       k8s_POD.b2390301_nginx_default_d4dfb568-45ec-11e7-91fe-
 0a35c9149e00_3ce7af06
 ```
 
@@ -706,11 +611,9 @@ IP:             172.17.0.2
 Controllers:    <none>
 Containers:
   nginx:
-    Container ID:               docker://9fc275cd7597e315a90826ac4558a5120fdca913bcc46e2895c608d0a0c36
-c1c
+    Container ID:               docker://9fc275cd7597e315a90826ac4558a5120fdca913bcc46e2895c608d0a0c36c1c
     Image:                      nginx:1.7.9
-    Image ID:                   docker-pullable://docker.io/nginx@sha256:e3456c851a152494c3e4ff5fcc26f
-240206abac0c9d794affb40e0714846c451
+    Image ID:                   docker-pullable://docker.io/nginx@sha256:e3456c851a152494c3e4ff5fcc26f240206abac0c9d794affb40e0714846c451
     Port:                       80/TCP
     State:                      Running
       Started:                  Wed, 31 May 2017 10:35:31 +0000
@@ -727,15 +630,14 @@ No volumes.
 QoS Class:      BestEffort
 Tolerations:    <none>
 Events:
-  FirstSeen     LastSeen        Count   From                            SubObjectPath           Type Reason                   Message
-  ---------     --------        -----   ----                            -------------           --------      ------                  -------
-  4m            4m              1       {default-scheduler }                                    NormalScheduled               Successfully assigned nginx to centos-minion1
-  4m            4m              1       {kubelet centos-minion1}        spec.containers{nginx}  NormalPulling                 pulling image "nginx:1.7.9"
-  4m            4m              2       {kubelet centos-minion1}                                Warning               MissingClusterDNS       kubelet does not have ClusterDNS IP configured and cannot create Pod using "ClusterFirst" policy. Falling back to DNSDefault policy.
-  4m            4m              1       {kubelet centos-minion1}        spec.containers{nginx}  NormalPulled                  Successfully pulled image "nginx:1.7.9"
-  4m            4m              1       {kubelet centos-minion1}        spec.containers{nginx}  NormalCreated                 Created container with docker id 9fc275cd7597; Security:[seccomp=unconfined]
-  4m            4m              1       {kubelet centos-minion1}        spec.containers{nginx}  Normal
-Started                 Started container with docker id 9fc275cd7597
+  FirstSeen     LastSeen        Count   From                            SubObjectPath           Type 	     	 Reason                   Message
+  ---------     --------        -----   ----                            -------------           --------     	 ------                   -------
+  4m            4m              1       {default-scheduler }                                    Normal           Scheduled 	          Successfully assigned nginx to centos-minion1
+  4m            4m              1       {kubelet centos-minion1}        spec.containers{nginx}  Normal           Pulling           	  pulling image "nginx:1.7.9"
+  4m            4m              2       {kubelet centos-minion1}                                Warning          MissingClusterDNS        kubelet does not have ClusterDNS IP configured and cannot create Pod using "ClusterFirst" policy. Falling back to DNSDefault policy.
+  4m            4m              1       {kubelet centos-minion1}        spec.containers{nginx}  Normal           Pulled                  Successfully pulled image "nginx:1.7.9"
+  4m            4m              1       {kubelet centos-minion1}        spec.containers{nginx}  Normal           Created                 Created container with docker id 9fc275cd7597; Security:[seccomp=unconfined]
+  4m            4m              1       {kubelet centos-minion1}        spec.containers{nginx}  Normal           Started                 Started container with docker id 9fc275cd7597
 ```
 
 Some important information here is that you see the docker container `ID`
@@ -840,14 +742,9 @@ see that it has been already stopped:
 
 ```bash
 [root@drpaneas2 ~]# docker ps
-CONTAINER ID        IMAGE                                      COMMAND                  CREATED       
-      STATUS              PORTS               NAMES
-9fc275cd7597        nginx:1.7.9                                "nginx -g 'daemon off"   47 minutes ago
-      Up 47 minutes                           k8s_nginx.b0df00ef_nginx_default_d4dfb568-45ec-11e7-91fe
--0a35c9149e00_ece8325b
-bef1f611ff9b        gcr.io/google_containers/pause-amd64:3.0   "/pause"                 47 minutes ago
-      Up 47 minutes                           k8s_POD.b2390301_nginx_default_d4dfb568-45ec-11e7-91fe-0
-a35c9149e00_3ce7af06
+CONTAINER ID        IMAGE                                      COMMAND                  CREATED             STATUS              PORTS               NAMES
+9fc275cd7597        nginx:1.7.9                                "nginx -g 'daemon off"   47 minutes ago      Up 47 minutes                           k8s_nginx.b0df00ef_nginx_default_d4dfb568-45ec-11e7-91fe-0a35c9149e00_ece8325b
+bef1f611ff9b        gcr.io/google_containers/pause-amd64:3.0   "/pause"                 47 minutes ago      Up 47 minutes                           k8s_POD.b2390301_nginx_default_d4dfb568-45ec-11e7-91fe-0a35c9149e00_3ce7af06
 ```
 Now let us also remove the nginx container:
 
@@ -1000,20 +897,11 @@ This also means that in our minion, we are running now 4 containers:
 
 ```bash
 [root@drpaneas2 ~]# docker ps
-CONTAINER ID        IMAGE                                      COMMAND                  CREATED       
-      STATUS              PORTS               NAMES
-f9007379f757        nginx:1.7.9                                "nginx -g 'daemon off"   50 seconds ago
-      Up 49 seconds                           k8s_nginx2.428f0121_nginx2_default_5f91234f-45f6-11e7-91
-fe-0a35c9149e00_ad9421e1
-75c528f64f3f        gcr.io/google_containers/pause-amd64:3.0   "/pause"                 50 seconds ago
-      Up 49 seconds                           k8s_POD.b2390301_nginx2_default_5f91234f-45f6-11e7-91fe-
-0a35c9149e00_1cf67320
-b1582754a595        nginx:1.7.9                                "nginx -g 'daemon off"   5 minutes ago 
-      Up 5 minutes                            k8s_nginx.b0df00ef_nginx_default_b4dcc3c9-45f5-11e7-91fe
--0a35c9149e00_8810d6a3
-e98169846a83        gcr.io/google_containers/pause-amd64:3.0   "/pause"                 5 minutes ago 
-      Up 5 minutes                            k8s_POD.b2390301_nginx_default_b4dcc3c9-45f5-11e7-91fe-0
-a35c9149e00_e2f1104f
+CONTAINER ID        IMAGE                                      COMMAND                  CREATED             STATUS              PORTS               NAMES
+f9007379f757        nginx:1.7.9                                "nginx -g 'daemon off"   50 seconds ago      Up 49 seconds                           k8s_nginx2.428f0121_nginx2_default_5f91234f-45f6-11e7-91fe-0a35c9149e00_ad9421e1
+75c528f64f3f        gcr.io/google_containers/pause-amd64:3.0   "/pause"                 50 seconds ago      Up 49 seconds                           k8s_POD.b2390301_nginx2_default_5f91234f-45f6-11e7-91fe-0a35c9149e00_1cf67320
+b1582754a595        nginx:1.7.9                                "nginx -g 'daemon off"   5 minutes ago       Up 5 minutes                            k8s_nginx.b0df00ef_nginx_default_b4dcc3c9-45f5-11e7-91fe-0a35c9149e00_8810d6a3
+e98169846a83        gcr.io/google_containers/pause-amd64:3.0   "/pause"                 5 minutes ago       Up 5 minutes                            k8s_POD.b2390301_nginx_default_b4dcc3c9-45f5-11e7-91fe-0a35c9149e00_e2f1104f
 ```
 
 So, why would I do it that way? We might have thousands of pods running.
@@ -1040,11 +928,9 @@ IP:             172.17.0.3
 Controllers:    <none>
 Containers:
   nginx2:
-    Container ID:               docker://f9007379f7572c49769164d9b31d9814cd30404ab93c8b73258b672fba449
-205
+    Container ID:               docker://f9007379f7572c49769164d9b31d9814cd30404ab93c8b73258b672fba449205
     Image:                      nginx:1.7.9
-    Image ID:                   docker-pullable://docker.io/nginx@sha256:e3456c851a152494c3e4ff5fcc26f
-240206abac0c9d794affb40e0714846c451
+    Image ID:                   docker-pullable://docker.io/nginx@sha256:e3456c851a152494c3e4ff5fcc26f240206abac0c9d794affb40e0714846c451
     Port:                       80/TCP
     State:                      Running
       Started:                  Wed, 31 May 2017 11:43:33 +0000
@@ -1061,14 +947,13 @@ No volumes.
 QoS Class:      BestEffort
 Tolerations:    <none>
 Events:
-  FirstSeen     LastSeen        Count   From                            SubObjectPath           Type Reason                   Message
-  ---------     --------        -----   ----                            -------------           --------      ------                  -------
-  4m            4m              1       {default-scheduler }                                    NormalScheduled               Successfully assigned nginx2 to centos-minion1
-  4m            4m              2       {kubelet centos-minion1}                                Warning               MissingClusterDNS       kubelet does not have ClusterDNS IP configured and cannot create Pod using "ClusterFirst" policy. Falling back to DNSDefault policy.
-  4m            4m              1       {kubelet centos-minion1}        spec.containers{nginx2} NormalPulled                  Container image "nginx:1.7.9" already present on machine
-  4m            4m              1       {kubelet centos-minion1}        spec.containers{nginx2} NormalCreated                 Created container with docker id f9007379f757; Security:[seccomp=unconfined]
-  4m            4m              1       {kubelet centos-minion1}        spec.containers{nginx2} Normal
-Started                 Started container with docker id f9007379f757
+  FirstSeen     LastSeen        Count   From                            SubObjectPath           Type 		Reason                   Message
+  ---------     --------        -----   ----                            -------------           --------      	------      	         -------
+  4m            4m              1       {default-scheduler }                                    Normal		Scheduled               Successfully assigned nginx2 to centos-minion1
+  4m            4m              2       {kubelet centos-minion1}                                Warning         MissingClusterDNS       kubelet does not have ClusterDNS IP configured and cannot create Pod using "ClusterFirst" policy. Falling back to DNSDefault policy.
+  4m            4m              1       {kubelet centos-minion1}        spec.containers{nginx2} Normal		Pulled                  Container image "nginx:1.7.9" already present on machine
+  4m            4m              1       {kubelet centos-minion1}        spec.containers{nginx2} Normal		Created                 Created container with docker id f9007379f757; Security:[seccomp=unconfined]
+  4m            4m              1       {kubelet centos-minion1}        spec.containers{nginx2} Normal		Started                 Started container with docker id f9007379f757
 ```
 
 This is an easy way to refer to complex infrastucture that I am  virtualizing as
@@ -1275,12 +1160,9 @@ NewReplicaSet:  nginx-deployment-dev-3767386797 (1/1 replicas created)
 Events:
   FirstSeen     LastSeen        Count   From                            SubObjectPath   Type            Reason                  Message
   ---------     --------        -----   ----                            -------------   --------        ------                  -------
-  13m           13m             1       {deployment-controller }                        Normal          ScalingReplicaSet       Scaled up replica set ngi
-nx-deployment-dev-3607872275 to 1
-  6m            6m              1       {deployment-controller }                        Normal          ScalingReplicaSet       Scaled up replica set ngi
-nx-deployment-dev-3767386797 to 1
-  6m            6m              1       {deployment-controller }                        Normal          ScalingReplicaSet       Scaled down replica set n
-ginx-deployment-dev-3607872275 to 0
+  13m           13m             1       {deployment-controller }                        Normal          ScalingReplicaSet       Scaled up replica set nginx-deployment-dev-3607872275 to 1
+  6m            6m              1       {deployment-controller }                        Normal          ScalingReplicaSet       Scaled up replica set nginx-deployment-dev-3767386797 to 1
+  6m            6m              1       {deployment-controller }                        Normal          ScalingReplicaSet       Scaled down replica set nginx-deployment-dev-3607872275 to 0
 ```
 
 As you can see the `StrategyType` has changed into `RollingUpdate` and the
@@ -1384,6 +1266,7 @@ NAME              READY     STATUS    RESTARTS   AGE
 nginx-www-m8x9q   1/1       Running   0          9m
 nginx-www-vkvw5   1/1       Running   0          9m
 nginx-www-xvjvb   1/1       Running   0          9m
+
 [root@drpaneas1 Builds]# kubectl describe replicationcontroller
 Name:           nginx-www
 Namespace:      default
@@ -1396,12 +1279,9 @@ No volumes.
 Events:
   FirstSeen     LastSeen        Count   From                            SubObjectPath   Type            Reason                  Message
   ---------     --------        -----   ----                            -------------   --------        ------                  -------
-  10m           10m             1       {replication-controller }                       Normal          SuccessfulCreate        Created pod: nginx-www-xv
-jvb
-  10m           10m             1       {replication-controller }                       Normal          SuccessfulCreate        Created pod: nginx-www-vk
-vw5
-  10m           10m             1       {replication-controller }                       Normal          SuccessfulCreate        Created pod: nginx-www-m8
-x9q
+  10m           10m             1       {replication-controller }                       Normal          SuccessfulCreate        Created pod: nginx-www-xvjvb
+  10m           10m             1       {replication-controller }                       Normal          SuccessfulCreate        Created pod: nginx-www-vkvw5
+  10m           10m             1       {replication-controller }                       Normal          SuccessfulCreate        Created pod: nginx-www-m8x9q
 ```
 
 The replication controller tells me that I have 3 of these running,
@@ -1781,12 +1661,9 @@ Which means that is running 2 docker containers:
 
 ```bash
 # docker ps
-CONTAINER ID        IMAGE                                      COMMAND                  CREATED             STATUS              
-PORTS               NAMES
-1bd5a0915963        nginx                                      "nginx -g 'daemon off"   5 minutes ago       Up 5 minutes        
-                    k8s_myautoscale.f898ffdc_myautoscale-3958947512-3p5l4_default_ffa4bfb9-46fa-11e7-8983-0a35c9149e00_8d846e33
-40c5b1cf3a4d        gcr.io/google_containers/pause-amd64:3.0   "/pause"                 5 minutes ago       Up 5 minutes        
-                    k8s_POD.b2390301_myautoscale-3958947512-3p5l4_default_ffa4bfb9-46fa-11e7-8983-0a35c9149e00_4cb76f9d
+CONTAINER ID        IMAGE                                      COMMAND                  CREATED             STATUS              PORTS               NAMES
+1bd5a0915963        nginx                                      "nginx -g 'daemon off"   5 minutes ago       Up 5 minutes                            k8s_myautoscale.f898ffdc_myautoscale-3958947512-3p5l4_default_ffa4bfb9-46fa-11e7-8983-0a35c9149e00_8d846e33
+40c5b1cf3a4d        gcr.io/google_containers/pause-amd64:3.0   "/pause"                 5 minutes ago       Up 5 minutes                            k8s_POD.b2390301_myautoscale-3958947512-3p5l4_default_ffa4bfb9-46fa-11e7-8983-0a35c9149e00_4cb76f9d
 ```
 
 Now, I may need to autoscale this depending upon various conditions. The one that I have
@@ -1959,23 +1836,17 @@ minion_1
 
 ```bash
 [root@drpaneas2 ~]# docker ps
-CONTAINER ID        IMAGE                                      COMMAND                  CREATED             STATUS              
-PORTS               NAMES
-e7ce117e9c0f        nginx                                      "nginx -g 'daemon off"   31 seconds ago      Up 30 seconds       
-                    k8s_myrecovery.1371ff8a_myrecovery-3755654676-qfc71_default_481562fa-46f2-11e7-8983-0a35c9149e00_9b42bd0c
-e1f60db6cd12        gcr.io/google_containers/pause-amd64:3.0   "/pause"                 32 seconds ago      Up 31 seconds       
-                    k8s_POD.b2390301_myrecovery-3755654676-qfc71_default_481562fa-46f2-11e7-8983-0a35c9149e00_e69fa223
+CONTAINER ID        IMAGE                                      COMMAND                  CREATED             STATUS              PORTS               NAMES
+e7ce117e9c0f        nginx                                      "nginx -g 'daemon off"   31 seconds ago      Up 30 seconds                           k8s_myrecovery.1371ff8a_myrecovery-3755654676-qfc71_default_481562fa-46f2-11e7-8983-0a35c9149e00_9b42bd0c
+e1f60db6cd12        gcr.io/google_containers/pause-amd64:3.0   "/pause"                 32 seconds ago      Up 31 seconds                           k8s_POD.b2390301_myrecovery-3755654676-qfc71_default_481562fa-46f2-11e7-8983-0a35c9149e00_e69fa223
 ```
 
 minion_2
 
 ```bash
-CONTAINER ID        IMAGE                                      COMMAND                  CREATED              STATUS              PORTS     
-          NAMES
-d0cf0b3c8c3b        nginx                                      "nginx -g 'daemon off"   About a minute ago   Up About a minute             
-          k8s_myrecovery.1371ff8a_myrecovery-3755654676-t4064_default_48158b96-46f2-11e7-8983-0a35c9149e00_e04e7997
-715206a85679        gcr.io/google_containers/pause-amd64:3.0   "/pause"                 About a minute ago   Up About a minute             
-          k8s_POD.b2390301_myrecovery-3755654676-t4064_default_48158b96-46f2-11e7-8983-0a35c9149e00_ab638246
+CONTAINER ID        IMAGE                                      COMMAND                  CREATED              STATUS              PORTS               NAMES
+d0cf0b3c8c3b        nginx                                      "nginx -g 'daemon off"   About a minute ago   Up About a minute                      k8s_myrecovery.1371ff8a_myrecovery-3755654676-t4064_default_48158b96-46f2-11e7-8983-0a35c9149e00_e04e7997
+715206a85679        gcr.io/google_containers/pause-amd64:3.0   "/pause"                 About a minute ago   Up About a minute                      k8s_POD.b2390301_myrecovery-3755654676-t4064_default_48158b96-46f2-11e7-8983-0a35c9149e00_ab638246
 ```
 
 Also, just to clarify that I am using only two minion, and not 3.
