@@ -17,26 +17,25 @@ to use them.
 
 So let’s go back in time, when computers were enormous things and filled complete
 rooms. They were very long lived and hard to change. Today, we have got smaller
-computers, and especially with the **IoT** we have lot’s of tiny hardware which
+computers, and especially with the *IoT* we have lot’s of tiny hardware which
 they still fill rooms. Even these tiny things were still *“too large”* and
 *“big enough”* to manage, so we created the virtual machines, so to slice up these
 computers without taking space. We still use these virtual machines and we still are
-managing them like normal computers, unless you are Netflix. But these virtual servers
+managing them like normal computers (unless you are Netflix). But these virtual servers
 were still slow enough until we realise they exist: I mean they still need about a minute
 or so to boot up and shutdown again. So, we still manage them as if they were normal
 computers. But then we have got some really really small VMs, and this are containers.
 These containers are much much much faster and much much much more efficient. In a matter
 of fact, they are so fast and efficient that you can wrap every process inside a container.
-See for example RacherOS, where everything runs inside a docker container. System processes
-like udev and ntp are running inside docker. So, really fast and efficient small things.
-And lately, we’ve got cluster-kind-of-schedulers (so called orchestrators) for our
-containers. Things that google was doing those things tens years ago with Borg, but also
-Mesos, Kubernetes, Swarm.
+See for example [RacherOS](https://rancher.com/rancher-os/), where everything runs inside
+a docker container. System processes like `udev` and `ntp` are running inside docker. So,
+really fast and efficient small things. Lately, we’ve got cluster-kind-of-schedulers
+(so called orchestrators) for our containers.
 
-That is essential simplified and changed the infrastructure into one big process-list.
+That is essential simplified and changed the infrastructure into one **big process-list**.
 It’s a list of processes that are running inside containers. And the infrastructure then
-started to look like something like a very big computer. In the same way you can run “ps”
-in your laptop, you can now run “ps” on your infrastructure and just see everything that
+started to look like something like a **very big computer**. In the same way you can run `ps`
+in your laptop, you can now run `ps` on your infrastructure and just see everything that
 is running. When you see a process running in your laptop, you don’t care in which stick
 of RAM it runs. In the same way, you don’t care where your process is running in Kubernetes.
 If you start to care less about things, then you start not to observe the existence of
@@ -48,20 +47,19 @@ that people are wrapping all the dependencies needed inside them.
 
 ### A cloud for containers
 
-What is new is how computing is supplied for people who are writing applications and that’s
+What is new is *how computing is supplied* for people who are writing applications and that’s
 the cloud. As I’ve told you earlier, we indeed are slicing up our computers, but they are
 still hosted inside a physical computer. In the past that was constrained by the number of
 computers you had in room and from the space of this room, but that’s not the case anymore.
 We have this sort of infinite supply of computing which comes sort of out of nowhere. For
-example, from the POV of the user, Amazon EC2 looks like a limitless supply of machines.
-Nobody worries about the servers, where they were, because it didn’t really matter. However,
-people were still thinking about Virtual Machines in the cloud. What about running containers
-in the cloud? In other words, what about running processes in the cloud? So, in some sense
-now we combine containers and cloud that computer looks like an enormous computer that we run
-code on. We don’t really have constraints any more. This is because we have containerization
-that allows us to wrap up our application inside with all its dependencies and then have it
-boot up really quickly anywhere, regardless of where it is. So that kind of generally is
-sort of a trend that is happening, so why am I talking about this ...
+example, from the POV of the user, *Amazon EC2* looks like a limitless supply of machines.
+Nobody worries about the servers (*e.g.* where they were), because it didn’t really matter.
+What about running containers in the cloud? In other words, what about running processes in
+the cloud? So, in some sense now we combine containers and cloud that computer looks like an
+enormous computer that we run code on. We don’t really have constraints any more. This is
+because we have containerization that allows us to wrap up our application inside with all
+its dependencies and then have it boot up really quickly anywhere, regardless of where it is.
+So that kind of generally is sort of a trend that is happening, so why am I talking about this ...
 
 Actually, Google does this kind of stuff, and they do those stuff for years. So, what changes
 today is that this technology has started to become available for everyone and lot’s of
@@ -69,13 +67,13 @@ companies are jumping in.
 
 ## What is serverless
 
-Serveless doesn’t mean there are no servers. There are servers, they do exist. They are
-just someone else servers that this guy is responsible for managing and scaling them up
+Serveless doesn’t mean there are no servers. There are servers, they *do* exist. They are
+just someone's else servers who is responsible for managing and scaling them up
 for you. You just send the code, the code runs and you forget about it.
 
-What do you mean forget about it? Well, there’s an element of a system managing them for
-you. You see,  when I told you earlier “there are somebody’s else servers, I never told
-you that this somebody is a real person”. When you deploy a function in openFaaS,
+What do you mean *forget about it?* Well, there’s an element of a system managing them for
+you. You see, when I told you earlier *there are somebody’s else servers*, I never told
+you that this somebody is a real person. When you deploy a function in openFaaS,
 Kubernetes takes care of managing these functions: if they are have problems, k8s will
 fix them for you. If the usage increases, k8s will auto-scale them for you. If there’s a
 new version, k8s will update them for you. So, we have system doing the hard work for us.
@@ -180,8 +178,8 @@ then it automatically autoscales using the Dockerswarm or Kubernetes API.
 
 ### Contact your k8s cluster
 
-I have setup this cluster using CaaSP v2.0 which is important to use a version equal or
-higher than 1.7. Kubernetes upstream is already at version 1.9, while the CaaSP ships 1.7,
+I have setup this cluster using [CaaSP v2.0](https://www.suse.com/communities/blog/suse-caas-platform-2-now-generally-available/)
+which is important to use a version equal or higher than `1.7`. Kubernetes upstream is already at version 1.8, while the CaaSP ships 1.7,
 we are still fine going with that. Just make sure you have the kubeconfig at:  `cp ~/Downloads/kubeconfig ~/.kube/config`
 or `export KUBECONFIG=~/Downloads/kubeconfig`
 
@@ -512,7 +510,7 @@ CMD ["fwatchdog"]
 ```
 
 We are using the `crosbymichael/youtubedl` simply because it already contains the `youtube-dl` binary.
-Then we pass whatever parameters the user is going to pass: e.g. /dev/stdin
+Then we pass whatever parameters the user is going to pass: e.g. `/dev/stdin`
 What is standard is the fwatchdog thingy:
 
 ```bash
@@ -534,7 +532,7 @@ done < "${1:-/dev/stdin}"
 youtube-dl $line --no-warnings --quiet -o -
 ```
 
-The script uses the 'read' command which is used to read from the standard input. Usually it is used for user input.
+The script uses the `read` command which is used to read from the `standard input`. Usually it is used for user input.
 e.g.
 
 ```bash
@@ -543,15 +541,15 @@ e.g.
 ```
 
 It is reading line by line and the `return code` of the `read` command is `zero`, unless an end-of-file
-character is encountered, Used in a 'while loop' it actually reads a file line by line assigning the
+character is encountered, Used in a `while loop` it actually reads a file line by line assigning the
 value to a called `line`.
 
 
-The ``${1:-/dev/stdin}`` is an application of bash parameter expansion that says:
-return the value of $1, unless $1 is undefined (no argument was passed) or its value is the empty string (""or '' was passed).
-Notice: The variation ${1-/dev/stdin} (no :) would only return /dev/stdin if $1 is undefined (if it contains any value, even the empty string, it would be returned).
+The `${1:-/dev/stdin}` is an application of bash parameter expansion that says:
+`return` the value of `$1`, unless `$1` is `undefined` (no argument was passed) or its `value` is the empty string (""or '' was passed).
+Notice: The variation `${1-/dev/stdin}` would only return `/dev/stdin` if `$1` is `undefined` (if it contains any value, even the *empty string*, it would be returned).
 
-Also To output to stdout use ``-o -``. Which means that the output of 'youtube-dl' will be on ... terminal :P
+Also To output to stdout use ``-o -``. Which means that the output of `youtube-dl` will be on ... terminal.
 So, an example would be:
 
 ```bash
@@ -561,7 +559,7 @@ youtube-dl https://www.youtube.com/watch?v=Nw42q1ofrV0 --no-warnings --quiet -o 
 Last but not least, we build the image:
 
 ```bash
-drpaneas@localhost:~/github/youtube-dl> sudo docker build -t drpaneas/faas-youtubedl .
+sudo docker build -t drpaneas/faas-youtubedl .
 [sudo] password for root:
 
 Sending build context to Docker daemon 79.36 kB
@@ -596,7 +594,7 @@ Removing intermediate container f844ace7ad7e
 Successfully built 7ced4553f05c
 ```
 
-Next, it's time to 'push' that image to dockerhub. Let's try it:
+Next, it's time to `push` that image to dockerhub. Let's try it:
 First authenticate yourself:
 
 ```
@@ -623,7 +621,6 @@ a2ce316698cd: Pushed
 latest: digest: sha256:efa600d5123d4a91d15eec53ea7cc00e7e102ed8c45cb7b9f00095590210c1b4 size: 3234
 ```
 
-
 Now use 'faas-cli' to deploy it:
 
 ```bash
@@ -647,18 +644,18 @@ Test it:`curl http://192.168.178.122:31112/function/youtubedl -d "https://www.yo
 Idea: We want to pass an image and resize it by 50%
 
 ImageMagick permits image data to be read and written from the standard streams
-STDIN (standard in) and STDOUT (standard out), respectively, using a pseudo-filename of `-`
+`STDIN` (standard in) and `STDOUT` (standard out), respectively, using a pseudo-filename of `-`
 
 example: `cat input.jpg | convert - -resize "50%" output.jpg`
 
-Other pipes can be accessed via their file descriptors (as of version 6.4.9-3).
-The file descriptors 0, 1, and 2 are reserved for the standard streams STDIN, STDOUT,
-and STDERR, respectively, but a pipe associated with a file descriptor number N>2 can be accessed
-using the pseudonym fd:N. (The pseudonyms fd:0 and fd:1 can be used for STDIN and STDOUT.)
+Other pipes can be accessed via their *file descriptors* (as of version 6.4.9-3).
+The file descriptors `0`, `1`, and `2` are reserved for the standard streams `STDIN`, `STDOUT`,
+and `STDERR`, respectively, but a pipe associated with a file descriptor number `N>2` can be accessed
+using the pseudonym `fd:N`. (The pseudonyms `fd:0` and `fd:1` can be used for `STDIN` and `STDOUT`).
 
 example: `cat input.jpg | convert - -resize "50%" fd:1 > output.jpg`
 
-As a result, the 'fprocess' will be:
+As a result, the `fprocess` will be:
 
 `fprocess="convert - -resize 50% fd:1"`
 
@@ -693,7 +690,7 @@ Every single function I’ve encountered upon in the repositories, it’s consis
 own Docker image, usually hosted in DockerHub. So, is this a problem? Well, no ... and yes ...
 I guess it doesn’t feel right to create so much overlap. Especially when you are a lazy
 guy - like me - then you start to look for base patterns which you could possibly re-iterate.
-Then, not exactly out of the sudden, I end up with the fellowship of Firefox tabs.
+Then, not exactly out of the sudden, I end up with the *fellowship of the tabs*.
 
 But before changing things, you must first understand them.
 
@@ -701,9 +698,9 @@ You see, I am not a developer. Truth is I speak a little bit of C++ and Python, 
 close to anything like a native speaker. And this is a good thing. Maybe. So, how a non-developer
 guy write his own functions? Easy: He doesn’t, because he doesn’t have to. You see, in our age,
 there’s always Someone Out There (TM), who has possibly think of what you’re thinking. Fortunately,
-this Someone or else, has already implemented it. This is the beauty of Linux: a shitload of free utilities.
+this Someone or else, has already implemented it.
 
-OpenFaaS works also with binaries. So, I thought ... let’s create a shitload of functions based on
+OpenFaaS works also with binaries. So, I thought ... let’s create a functions based on
 these utilities or combinations of those. Well, someone could ask: why you should do such a thing
 when you already have this functionality in your PC?
 
