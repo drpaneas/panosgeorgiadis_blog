@@ -170,9 +170,9 @@ and the users can access them.
 The Watchdog is embedded in every container and this is the magic thing that allows the
 container to become serveless. It does all the work for you.
 
-The Prometheus unterpins the whole stack and collects statistics. With these statistics we
+The Prometheus underpins the whole stack and collects statistics. With these statistics we
 can build customizable dashboard and and when a certain functions gets a lot of traffic,
-then it automatically autoscales using the Dockerswarm or Kubernetes API.
+then it automatically autoscales using the Docker Swarm or Kubernetes API.
 
 ## How to setup openFaaS in SUSE Containers as a Service Platform
 
@@ -369,8 +369,7 @@ GitHub Repo with functions: [FaaS and Furious](https://github.com/faas-and-furio
 Import a function:
 
 ```bash
-faas-cli deploy -f https://raw.githubusercontent.com/faas-and-furious/openfaas-mememachine/master/mememachine.yml -e read_timeo
-ut=60,write_timeout=60  --gateway http://d100.qam.suse.de:31112
+faas-cli deploy -f https://raw.githubusercontent.com/faas-and-furious/openfaas-mememachine/master/mememachine.yml -e read_timeout=60 -e write_timeout=60  --gateway http://d100.qam.suse.de:31112
 ```
 
 Expected outout would be:
@@ -659,7 +658,7 @@ As a result, the `fprocess` will be:
 
 `fprocess="convert - -resize 50% fd:1"`
 
-We just need an image with 'imagegick' pkg installed. Then I will add the 'watchdog'.
+We just need an image with 'imagemagick' pkg installed. Then I will add the 'watchdog'.
 
 ```bash
 mkdir imagemagick && cd imagemagick
