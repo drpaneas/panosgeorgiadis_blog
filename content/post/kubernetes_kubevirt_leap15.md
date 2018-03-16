@@ -505,9 +505,11 @@ $ ./virtctl vnc --kubeconfig ~/.kube/config leap
 
 To sum up, this is just a project in a **very early stage**. The
 virtual-machines are running in **emulation mode**, which makes
-them **horribly slow**. This is more like of a proof of concept
-that Kubernetes can be a cluster manager for both kind of
-deployments: VMs and Containers. In the end of it, I hope you
+them **horribly slow**. However, performance drop is affected
+by a regression due to refactoring -- but they will soon
+[fix](https://t.co/qGiviRL5I9) it, so stay tuned!
+
+In the end of it, I hope you
 guys liked that project and go over [KubeVirt](https://github.com/kubevirt/kubevirt)
 GitHub page and *click at Star* to support the devs.
 
