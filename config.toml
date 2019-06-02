@@ -1,4 +1,4 @@
-baseurl = "http://panosgeorgiadis.com/"
+baseurl = "https://panosgeorgiadis.com/"
 title = "Panos Blog"
 languageCode = "en-us"
 disqusShortname = "PanosGeorgiadis"
