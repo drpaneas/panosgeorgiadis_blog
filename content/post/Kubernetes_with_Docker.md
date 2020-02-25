@@ -215,7 +215,7 @@ can use to install the latest version of `Docker` and `Kubernetes`.
 vim /etc/yum.repos.d/virt7-docker-common-release.repo
 [virt7-docker-common-release]
 name=virt7-docker-common-release
-baseurl=http://cbs.centos.org/repos/virt7-docker-common-release/x86_64/os/
+baseurl=https://cbs.centos.org/repos/virt7-docker-common-release/x86_64/os/
 gpgcheck=0
 ```
 
@@ -266,10 +266,10 @@ KUBE_ALLOW_PRIV="--allow-privileged=false"
 
 # Define the API Server
 # How the controller-manager, scheduler, and proxy find the apiserver
-KUBE_MASTER="--master=http://centos-master:8080"
+KUBE_MASTER="--master=https://centos-master:8080"
 
 # Define the ETCD Server
-KUBE_ETCD_SERVER="--etcd-servers=http://centos-master:2379"
+KUBE_ETCD_SERVER="--etcd-servers=https://centos-master:2379"
 ```
 
 This is the initial configuration for our master kubernetes node. Notice
@@ -295,10 +295,10 @@ ETCD_NAME=default
 ETCD_DATA_DIR="/var/lib/etcd/default.etcd"
 
 # Listen on all interfaces and accept connections from anywhere
-ETCD_LISTEN_CLIENT_URLS="http://0.0.0.0:2379"
+ETCD_LISTEN_CLIENT_URLS="https://0.0.0.0:2379"
 
 # Listen on all interfaces and accept connections from anywhere
-ETCD_ADVERTISE_CLIENT_URLS="http://0.0.0.0:2379"
+ETCD_ADVERTISE_CLIENT_URLS="https://0.0.0.0:2379"
 ```
 
 The master kubernetes nodes is the only place where we are going
@@ -319,7 +319,7 @@ KUBE_API_PORT="--port=8080"
 KUBELET_PORT="--kubelet-port=10250"
 
 # Comma separated list of nodes in the etcd cluster
-KUBE_ETCD_SERVERS="--etcd-servers=http://127.0.0.1:2379"
+KUBE_ETCD_SERVERS="--etcd-servers=https://127.0.0.1:2379"
 
 # Address range to use for services (Feel free to change it based on your environment)
 KUBE_SERVICE_ADDRESSES="--service-cluster-ip-range=10.254.0.0/16"
@@ -383,10 +383,10 @@ KUBE_LOG_LEVEL="--v=0"
 KUBE_ALLOW_PRIV="--allow-privileged=false"
 
 # How the minion talks with the API Server
-KUBE_MASTER="--master=http://centos-master:8080"
+KUBE_MASTER="--master=https://centos-master:8080"
 
 # How the minion talks with the ETCD Server
-KUBE_ETCD_SERVERe="--etcd-servers=http://centos-master:2379"
+KUBE_ETCD_SERVERe="--etcd-servers=https://centos-master:2379"
 ```
 
 Next, we are going to edit the `kubelet` configuration:
@@ -406,7 +406,7 @@ KUBELET_PORT="--port=10250"
 KUBELET_HOSTNAME="--hostname-override=centos-minion1"
 
 # location of the api-server
-KUBELET_API_SERVER="--api-servers=http://centos-master:8080"
+KUBELET_API_SERVER="--api-servers=https://centos-master:8080"
 
 # Add your own!
 KUBELET_ARGS=""
@@ -703,7 +703,7 @@ This command prompt indicates that I am actually in the Pod `busybox` running a
 container in it. The point is that this container can now see the `nginx`
 
 ```bash
-/ # wget --quiet --output-document - http://172.17.0.2
+/ # wget --quiet --output-document - https://172.17.0.2
 <!DOCTYPE html>
 <html>
 <head>
@@ -721,9 +721,9 @@ container in it. The point is that this container can now see the `nginx`
 <p>If you see this page, the nginx web server is successfully installed and
 working. Further configuration is required.</p>
 <p>For online documentation and support please refer to
-<a href="http://nginx.org/">nginx.org</a>.<br/>
+<a href="https://nginx.org/">nginx.org</a>.<br/>
 Commercial support is available at
-<a href="http://nginx.com/">nginx.com</a>.</p>
+<a href="https://nginx.com/">nginx.com</a>.</p>
 <p><em>Thank you for using nginx.</em></p>
 </body>
 </html>
@@ -780,7 +780,7 @@ As you can see I am now port forwarding the port 80 from the Pod
 `nginx` into my local port `43873`. So, I should be able to do:
 
 ```bash
-[root@drpaneas1 Builds]# curl http://localhost:43873
+[root@drpaneas1 Builds]# curl https://localhost:43873
 Handling connection for 43873
 <!DOCTYPE html>
 <html>
@@ -799,9 +799,9 @@ Handling connection for 43873
 <p>If you see this page, the nginx web server is successfully installed and
 working. Further configuration is required.</p>
 <p>For online documentation and support please refer to
-<a href="http://nginx.org/">nginx.org</a>.<br/>
+<a href="https://nginx.org/">nginx.org</a>.<br/>
 Commercial support is available at
-<a href="http://nginx.com/">nginx.com</a>.</p>
+<a href="https://nginx.com/">nginx.com</a>.</p>
 <p><em>Thank you for using nginx.</em></p>
 </body>
 </html>
@@ -1490,7 +1490,7 @@ Now we can check the IP of our cluster on port 8000 to get back the
 nginx which runs on port 80.
 
 ```bash
-/ # wget --quiet --output-document - http://10.254.78.47:8000
+/ # wget --quiet --output-document - https://10.254.78.47:8000
 <!DOCTYPE html>
 <html>
 <head>
@@ -1508,9 +1508,9 @@ nginx which runs on port 80.
 <p>If you see this page, the nginx web server is successfully installed and
 working. Further configuration is required.</p>
 <p>For online documentation and support please refer to
-<a href="http://nginx.org/">nginx.org</a>.<br/>
+<a href="https://nginx.org/">nginx.org</a>.<br/>
 Commercial support is available at
-<a href="http://nginx.com/">nginx.com</a>.</p>
+<a href="https://nginx.com/">nginx.com</a>.</p>
 <p><em>Thank you for using nginx.</em></p>
 </body>
 </html>

@@ -312,7 +312,7 @@ Perfect, so I know that I can access `d295.qam.suse.de`. Well, pretty much
 I can access any node from my cluster, and in order to prove that to you
 I am going to access `d100.qam.suse.de` instead:
 
-Go to: http://d100.qam.suse.de:31112/ui/
+Go to: https://d100.qam.suse.de:31112/ui/
 
 ```bash
 Click at: Create New Function
@@ -326,7 +326,7 @@ Network: func_functions  <--- always the same
 Test it from the command line:
 
 ```bash
-curl -X POST http://d100.qam.suse.de:31112/function/stronghash -d 'opensuse'
+curl -X POST https://d100.qam.suse.de:31112/function/stronghash -d 'opensuse'
 ```
 
 It should return the hash:
@@ -348,7 +348,7 @@ This will download the binary and then it will also move it to `/usr/local/bin`
 Make sure it works:
 
 ```bash
-drpaneas@localhost:~/github/faas-netes> faas-cli list --gateway http://d100.qam.suse.de:31112
+drpaneas@localhost:~/github/faas-netes> faas-cli list --gateway https://d100.qam.suse.de:31112
 Function                        Invocations     Replicas
 mememachine
 ```
@@ -356,9 +356,9 @@ mememachine
 Let me show you how you can call the function from the command-line:
 
 ```bash
-faas-cli invoke stronghash --gateway http://d100.qam.suse.de:31112/
-echo "hello world" | faas-cli invoke stronghash --gateway http://d100.qam.suse.de:31112/
-curl -X POST http://d100.qam.suse.de:31112/function/stronghash -d 'panos'
+faas-cli invoke stronghash --gateway https://d100.qam.suse.de:31112/
+echo "hello world" | faas-cli invoke stronghash --gateway https://d100.qam.suse.de:31112/
+curl -X POST https://d100.qam.suse.de:31112/function/stronghash -d 'panos'
 ```
 
 ## Try other people's functions:
@@ -369,7 +369,7 @@ GitHub Repo with functions: [FaaS and Furious](https://github.com/faas-and-furio
 Import a function:
 
 ```bash
-faas-cli deploy -f https://raw.githubusercontent.com/faas-and-furious/openfaas-mememachine/master/mememachine.yml -e read_timeout=60 -e write_timeout=60  --gateway http://d100.qam.suse.de:31112
+faas-cli deploy -f https://raw.githubusercontent.com/faas-and-furious/openfaas-mememachine/master/mememachine.yml -e read_timeout=60 -e write_timeout=60  --gateway https://d100.qam.suse.de:31112
 ```
 
 Expected outout would be:
@@ -379,7 +379,7 @@ Parsed: https://raw.githubusercontent.com/faas-and-furious/openfaas-mememachine/
 Deploying: mememachine.
 No existing service to remove
 Deployed.
-URL: http://192.168.178.122:31112/function/mememachine
+URL: https://192.168.178.122:31112/function/mememachine
 
 202 Accepted
 ```
@@ -387,14 +387,14 @@ URL: http://192.168.178.122:31112/function/mememachine
 Test it:
 
 ```bash
-echo '{"image": "http://vignette4.wikia.nocookie.net/factpile/images/6/66/Lotr-boromir-1280jpg-
-b6a4d5_1280w.jpg","top": "ONE DOES NOT SIMPLY JUST","bottom": "DEPLOY TO PRODUCTION"}' | faas-cli invoke mememachine --gateway http://192.168.178.122:31112/ > meme.jpg
+echo '{"image": "https://vignette4.wikia.nocookie.net/factpile/images/6/66/Lotr-boromir-1280jpg-
+b6a4d5_1280w.jpg","top": "ONE DOES NOT SIMPLY JUST","bottom": "DEPLOY TO PRODUCTION"}' | faas-cli invoke mememachine --gateway https://192.168.178.122:31112/ > meme.jpg
 ```
 
 However, if you don't want to force the users to use `faas-cli invoke` they can use `curl` also:
 
 ```bash
-curl --request POST --data-binary '{"image": "http://vignette4.wikia.nocookie.net/factpile/images/6/66/Lotr-boromir-1280jpg-b6a4d5_1280w.jpg","top": "ONE DOES NOT SIMPLY JUST","bottom": "DEPLOY TO PRODUCTION"}' http://d100.qam.suse.de:31112/function/mememachine > meme.jpg
+curl --request POST --data-binary '{"image": "https://vignette4.wikia.nocookie.net/factpile/images/6/66/Lotr-boromir-1280jpg-b6a4d5_1280w.jpg","top": "ONE DOES NOT SIMPLY JUST","bottom": "DEPLOY TO PRODUCTION"}' https://d100.qam.suse.de:31112/function/mememachine > meme.jpg
 ```
 
 ## Create your own functions
@@ -411,12 +411,12 @@ You can read the code in the `handler.py` and include any Python3 module in `req
 After that, let's build: `faas-cli build -f hello-python.yml`.
 
 Then we push the image to DockerHub: `docker push drpaneas/hello-python`
-and last thing is to deploy it: `faas-cli deploy -f hello-python.yml --gateway http://d100.qam.suse.de:31112/`
+and last thing is to deploy it: `faas-cli deploy -f hello-python.yml --gateway https://d100.qam.suse.de:31112/`
 
 To test if it works:
 
 ```bash
-curl -X POST http://d100.qam.suse.de:31112/function/hello-python -d 'Lunch and Learn'
+curl -X POST https://d100.qam.suse.de:31112/function/hello-python -d 'Lunch and Learn'
 ```
 
 ## Dig deeper
@@ -624,19 +624,19 @@ Now use 'faas-cli' to deploy it:
 
 ```bash
 faas-cli deploy \
- --gateway http://192.168.178.122:31112 \
+ --gateway https://192.168.178.122:31112 \
  --image drpaneas/faas-youtubedl \
  --name youtubedl \
  --fprocess="sh ./entry.sh"
 
 No existing service to remove
 Deployed.
-URL: http://192.168.178.122:31112/function/youtubedl
+URL: https://192.168.178.122:31112/function/youtubedl
 
 202 Accepted
 ```
 
-Test it:`curl http://192.168.178.122:31112/function/youtubedl -d "https://www.youtube.com/watch?v=nG2rNBFzkGE" > cat_jump.mov`
+Test it:`curl https://192.168.178.122:31112/function/youtubedl -d "https://www.youtube.com/watch?v=nG2rNBFzkGE" > cat_jump.mov`
 
 ## From an idea to a function
 
@@ -678,9 +678,9 @@ vi Dockerfile
 
 Build it: `sudo docker build -t drpaneas/resize .`
 Push: `sudo docker push drpaneas/resize`
-Convert: `faas-cli deploy --gateway http://192.168.178.122:31112 --image drpaneas/resize --name resize --fprocess="convert - -resize 50% fd:1"`
+Convert: `faas-cli deploy --gateway https://192.168.178.122:31112 --image drpaneas/resize --name resize --fprocess="convert - -resize 50% fd:1"`
 
-Call it: `curl http://192.168.178.122:31112/function/resize --data-binary @meme.jpg > smaller.png`
+Call it: `curl https://192.168.178.122:31112/function/resize --data-binary @meme.jpg > smaller.png`
 Call it alternative:  `cat whale.jpg | faas-cli invoke shrink-image > whale-small.jpg`
 
 ## Build a generic image

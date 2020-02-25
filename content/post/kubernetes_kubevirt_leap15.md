@@ -385,7 +385,7 @@ Go to the official openSUSE website and download the new
 Leap 15 ISO:
 
 ```bash
-wget http://download.opensuse.org/distribution/leap/15.0/iso/openSUSE-Leap-15.0-DVD-x86_64-Current.iso
+wget https://download.opensuse.org/distribution/leap/15.0/iso/openSUSE-Leap-15.0-DVD-x86_64-Current.iso
 ```
 
 ### Install the PVC plugin
