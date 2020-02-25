@@ -132,12 +132,12 @@ a.label:focus {
 
 /* suse */
 .theme-suse .label {
-  background-color: #02d35f;
+  background-color: #ee0000;
 }
 
 .theme-suse .pagination > li > a,
 .theme-suse .pagination > li > span {
-  color: #0d2c40;
+  color: #000000;
 }
 
 .theme-suse .pagination > .active > a,
@@ -146,8 +146,8 @@ a.label:focus {
 .theme-suse .pagination > .active > span:hover,
 .theme-suse .pagination > .active > a:focus,
 .theme-suse .pagination > .active > span:focus {
-  background-color: #0d2c40;
-  border-color: #0d2c40;
+  background-color: #000000;
+  border-color: #000000;
 }
 
 .theme-suse .pagination > .disabled > span,

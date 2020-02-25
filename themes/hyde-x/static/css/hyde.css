@@ -56,7 +56,7 @@ html {
 .sidebar {
   text-align: center;
   padding: 2rem 1rem;
-  color: #35b9ab;
+  color: #a30000;
   background-color: #202020;
 }
 @media (min-width: 48em) {
@@ -72,7 +72,7 @@ html {
 
 /* Sidebar links */
 .sidebar a {
-  color: #a0ff5f;
+  color: #cc0000;
 }
 
 /* About section */
@@ -179,11 +179,11 @@ a.sidebar-nav-item:focus {
 
 /* suse */
 .theme-suse .sidebar {
-  background-color: #0d2c40;
+  background-color: #000000;
 }
 .theme-suse .content a,
 .theme-suse .related-posts li a:hover {
-  color: #02a49c;
+  color: #820000;
 }
 
 /* Red */
