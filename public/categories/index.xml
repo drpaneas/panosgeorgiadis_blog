@@ -1,17 +1,32 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
-<rss version="2.0" xmlns:atom="https://www.w3.org/2005/Atom">
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>Categories on Panos Blog</title>
+    <title>Categories on drpaneas</title>
     <link>https://panosgeorgiadis.com/categories/</link>
-    <description>Recent content in Categories on Panos Blog</description>
+    <description>Recent content in Categories on drpaneas</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    
-	<atom:link href="https://panosgeorgiadis.com/categories/index.xml" rel="self" type="application/rss+xml" />
-    
+    <lastBuildDate>Sun, 15 Mar 2020 03:29:35 +0100</lastBuildDate><atom:link href="https://panosgeorgiadis.com/categories/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>kubernetes</title>
+      <link>https://panosgeorgiadis.com/categories/kubernetes/</link>
+      <pubDate>Sun, 15 Mar 2020 03:29:35 +0100</pubDate>
+      
+      <guid>https://panosgeorgiadis.com/categories/kubernetes/</guid>
+      <description></description>
+    </item>
     
     <item>
-      <title>Personal</title>
+      <title>tutorial</title>
+      <link>https://panosgeorgiadis.com/categories/tutorial/</link>
+      <pubDate>Wed, 16 Jan 2019 15:39:35 +0200</pubDate>
+      
+      <guid>https://panosgeorgiadis.com/categories/tutorial/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>personal</title>
       <link>https://panosgeorgiadis.com/categories/personal/</link>
       <pubDate>Mon, 08 May 2017 22:08:35 +0200</pubDate>
       

@@ -1,22 +1,18 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
-<rss version="2.0" xmlns:atom="https://www.w3.org/2005/Atom">
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>Personal on /var/log/messages</title>
+    <title>personal on drpaneas</title>
     <link>https://panosgeorgiadis.com/tags/personal/</link>
-    <description>Recent content in Personal on /var/log/messages</description>
+    <description>Recent content in personal on drpaneas</description>
     <generator>Hugo -- gohugo.io</generator>
-    <copyright>Everything is mine.</copyright>
-    <lastBuildDate>Mon, 08 May 2017 22:08:35 +0200</lastBuildDate>
-    
-	<atom:link href="https://panosgeorgiadis.com/tags/personal/index.xml" rel="self" type="application/rss+xml" />
-    
-    
+    <language>en-us</language>
+    <lastBuildDate>Mon, 08 May 2017 22:08:35 +0200</lastBuildDate><atom:link href="https://panosgeorgiadis.com/tags/personal/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>new_site</title>
-      <link>https://panosgeorgiadis.com/personal/new_site/</link>
+      <link>https://panosgeorgiadis.com/blog/2017/05/08/new_site/</link>
       <pubDate>Mon, 08 May 2017 22:08:35 +0200</pubDate>
       
-      <guid>https://panosgeorgiadis.com/personal/new_site/</guid>
+      <guid>https://panosgeorgiadis.com/blog/2017/05/08/new_site/</guid>
       <description>Hugo is a static site engine written in Go.
 It makes use of a variety of open source projects including:
  Cobra Viper J Walter Weatherman Cast  Learn more and contribute on GitHub.

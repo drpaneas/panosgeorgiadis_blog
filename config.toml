@@ -1,10 +1,43 @@
 baseurl = "https://panosgeorgiadis.com/"
-title = "Panos Blog"
+title = "drpaneas"
 languageCode = "en-us"
-disqusShortname = "PanosGeorgiadis"
-MetaDataFormat = "toml"
-theme = "hyde-x"
-paginate = 10
+theme = "hugo-theme-m10c"
+paginate = 8
+
+[menu]
+  [[menu.main]]
+    identifier = "home"
+    name = "Home"
+    url = "/"
+    weight = 1
+  [[menu.main]]
+    identifier = "tags"
+    name = "Tags"
+    url = "/tags/"
+    weight = 2
+  [[menu.main]]
+    identifier = "about"
+    name = "About"
+    url = "/about/"
+    weight = 3
+
+[params]
+  author = "Panos Georgiadis"
+  description = "Open Source developer."
+  avatar = "https://www.gravatar.com/avatar/a98d3abef556df10b9dfd4710e368f0e?s=200"
+  menu_item_separator = " - "
+  [[params.social]]
+    icon = "github"
+    name = "Github"
+    url = "https://github.com/drpaneas"
+  [[params.social]]
+    icon = "twitter"
+    name = "Twitter"
+    url = "https://twitter.com/PanosGeorgiadis"
+  [[params.social]]
+    icon = "linkedin"
+    name = "LinkedIn"
+    url = "https://www.linkedin.com/in/panosgeorgiadis/"
 
 [author]
     name = "Panos Georgiadis"
@@ -14,61 +47,16 @@ paginate = 10
     # The format shown here is the same one Jekyll/Octopress uses by default.
     post = "/blog/:year/:month/:day/:title/"
 
-[taxonomies]
-    # Optional. Use if you want tags and lists.
-    category = "categories"
-
-#
-# All parameters below here are optional and can be mixed and matched.
-#
-[params]
-    # If false display full article contents in blog index.
-    # Otherwise show description and 'read on' link to individual blog post page.
-    # Default (if omitted) is true.
-    truncate = true
-
-    # Used when a given page doesn't set its own.
-    defaultDescription = "Panos Georgiadis blog"
-    defaultKeywords = "default"
-
-    # Hide estimated reading time for posts.
-    # Default (if omitted) is false.
-    hideReadingTime = false
-
-    # Changes sidebar background and link/accent colours.
-    # See below for more colour options.
-    # This also works: "theme-base-08 layout-reverse", or just "layout-reverse".
-    theme = "theme-suse"
-
-    # Select a syntax highight.
-    # Check the static/css/highlight directory for options.
-    highlight = "github"
-
-    # Optional additional custom CSS file URL, will override other styles.
-    #customCSS = ""
-
-    # Displays under the author name in the sidebar, keep it short.
-    # You can use markdown here.
-    tagline = "@drpaneas"
-
-    # Text for the top menu link, which goes the root URL for the site.
-    # Default (if omitted) is "Blog".
-    home = "Blog"
-
-    # Metadata used to drive integrations.
-    googleAnalytics = "Your Google Analytics tracking code"
-    gravatarHash = "a98d3abef556df10b9dfd4710e368f0e"
-
-    # Sidebar social links, these must be full URLs.
-    github = "https://github.com/drpaneas"
-    #bitbucket = ""
-    stackOverflow = "https://stackoverflow.com/users/2526342/panos-georgiadis"
-    linkedin = "https://www.linkedin.com/in/panosgeorgiadis"
-    googleplus = "https://plus.google.com/+PanosGeorgiadis"
-    facebook = "https://www.facebook.com/drpaneas"
-    twitter = "https://twitter.com/PanosGeorgiadis"
-    youtube = "https://www.youtube.com/user/DrPaneas"
-
-    # Other social-like sidebar links
-    rss = true  # switch to true to enable RSS icon link
-    #flattr = ""  # populate with your flattr uid
+  # Default theme
+[params.style]
+    darkestColor = "#242930"    # left bar
+    darkColor = "#353353"       # right background
+    lightColor = "#e2dada"      # normal text
+    lightestColor = "#fdba31"   # headings
+    primaryColor = "#f72585"    # links fdba31
+    codeColor = "#35d475"
+    avatarColor = "#242930"
+    titleColor = "#efcb68"
+    headerColor = "#fdba31"
+    h1Color = "#e2dada"
+    
