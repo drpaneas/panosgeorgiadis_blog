@@ -1,7 +1,7 @@
 baseurl = "https://panosgeorgiadis.com/"
 title = "drpaneas"
 languageCode = "en-us"
-theme = "hugo-theme-m10c"
+theme = "m10c"
 paginate = 8
 
 [menu]
